@@ -1,0 +1,3 @@
+
+* 'drxtk.rb' emits warnings with '-w'. That probably isn't my fault.
+* Allow calling Drx.see() multiple times in one sitting.

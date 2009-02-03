@@ -1,0 +1,116 @@
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Dr. X -- The Good Doctor</title>
+<link rel="stylesheet" href="index.css" type="text/css">
+</head>
+
+<h1>Dr. X</h1>
+
+<a href="screenshot1.png"><img align="right" width="500" height="464" class="main"
+  src="screenshot1.png" title="Screenshot showing Dr. X in action" /></a>
+
+<p>"Dr. X", the good doctor, is a utility for programmers who wish to understand Ruby's
+object model better. It's a small 'gem' that exposes, in a Tk GUI,
+almost everything about a Ruby object: its 'klass', 'super', 'iv_tbl',
+'m_tbl'. See your singletons with your very own eyes!
+</p>
+
+<p class="error">
+2009-02-03 I've released this software only today; Consider it alpha quality.
+</p>
+
+<h2>Installation</h2>
+
+<p>Dr. X is shipped as a gem. At your system prompt type:</p>
+
+<code>gem install drx</code>
+
+<h2>Usage</h2>
+
+<p>Just <code>require 'drxtk'</code> in your program and do
+<code>Drx.see(some_object)</code> to investigate that object.</p>
+
+<h2>Requirements</h2>
+
+<p>This program uses the Tk user interface toolkit. You also need a
+working C compiler, because Dr. X has some part written in C.</p>
+
+<h2>Example</h2>
+
+Let's suppose you have the following DataMapper code...
+
+<pre>
+require 'rubygems'
+require 'dm-core'
+
+class Post
+  include DataMapper::Resource
+ 
+  property :post_id,  Integer, :serial => true
+  property :title,    String
+  property :body,     Text
+  
+  belongs_to :user
+end
+
+class User
+  include DataMapper::Resource
+ 
+  property :user_uid,  Integer, :serial => true
+  property :name,      String
+  property :mail,      String
+end
+</pre>
+
+<p>...and you wish to know what a Post object consists of. You'd append the following code...</p>
+
+<pre>
+post = Post.new
+
+require 'drxtk'
+Drx.see(post)
+</pre>
+
+<p>...and you'd get the window shown in the screenshot above (click to
+enlarge). Admittedly, it's ugly, but that's because I've used Tk. In the
+left pane you see the 'super' and 'klass' hierarchy. In the middle pane
+you see the instance variables and in the right-most one you see the
+methods.</p>
+
+<p>The screenshot happens to have the DataMapper::Model class selected.
+You can see the 'find_by_sql' and 'property' method on the right.</p>
+
+<p>The screenshot clearly shows two main branches. The lower one, in
+which DataMapper::Model appears, deals with the Post class singleton.
+The upper one, in which DataMapper::Resource appears, deals with the Post
+class itself.</p>
+
+<h2>What Dr. X really does</h2>
+
+Ruby stores objects in a C struct. Here's its definition (from ruby.h):
+
+<pre>
+struct RBasic {
+    unsigned long flags;
+    VALUE klass;
+};
+
+struct RObject {
+    struct RBasic basic;
+    struct st_table *iv_tbl;
+};
+
+struct RClass {
+    struct RBasic basic;
+    struct st_table *iv_tbl;
+    struct st_table *m_tbl;
+    VALUE super;
+};
+</pre>
+
+<p>What Dr. X does is show you these four slots: the 'klass', the 'super',
+the 'iv_tbl', and the 'm_tbl'.</p>
+
+<h2>Reporting bugs</h2>
+
+<p>Please file bugs and support requests at the RubyForge <a href="http://rubyforge.org/projects/drx/">website</a>.</p>

@@ -1,0 +1,13 @@
+= Dr. X, the Good Doctor
+
+Doctor X is a utility for programmers who wish to understand Ruby's
+object model better. It's a small 'gem' that exposes, in a Tk GUI,
+almost everything about a Ruby object: its 'klass', 'super', 'iv_tbl',
+'m_tbl'. See your singletons with your very own eyes!
+
+== Usage
+
+This section is yet to be written. In the meanwhile, visit the homepage
+to see usage example:
+
+  http://drx.rubyforge.org/

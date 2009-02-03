@@ -1,0 +1,48 @@
+body {
+  color: black;
+  background: white;
+  padding-left: 3em;
+  padding-right: 3em;
+  line-height: 130%;
+}
+img.main {
+  margin-left: 2em;
+}
+h1, h2, h3 { color: #005A9C }
+h1 { font: 170% sans-serif }
+h2 { font: 140% sans-serif }
+h3 { font: 120% sans-serif }
+h4 { font: bold 100% sans-serif }
+h5 { font: italic 100% sans-serif }
+h6 { font: small-caps 100% sans-serif }
+a {
+  color: #004080;
+}
+a:visited {
+  color: #A25909;
+}
+a:hover {
+  background: #ffa;
+}
+strong {
+  text-decoration: underline;
+  font-style: normal;
+}
+li {
+  padding-right: 2em;
+  margin-top: 0.2em;
+  margin-bottom: 0.2em;
+}
+.ttype {
+  font-family: monospace;
+}
+.error {
+  color: #ff0000 !important;
+}
+code {
+  background: #fafad2;
+}
+pre {
+  padding: 0.7em;
+  background: #f5deb3;
+}

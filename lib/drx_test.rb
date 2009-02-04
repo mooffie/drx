@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'drxtk'
 
 require 'date'
@@ -20,6 +21,4 @@ Drx.examine(zmn)
 #############################
 
 Drx.examinetk(zmn)
-
-#Drx.examinetk(zmn)
 #Drx.examinetk("some_string")

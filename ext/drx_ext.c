@@ -1,6 +1,14 @@
 #include "ruby.h"
 #include "st.h"
 
+/**
+ * Gets the Ruby's engine type of a variable.
+ */
+static VALUE t_get_type(VALUE self, VALUE obj)
+{
+  return INT2NUM(TYPE(obj));
+}
+
 // Helper for t_get_iv_tbl().
 int record_var(st_data_t key, st_data_t value, VALUE hash) {
   // I originally did the following, but it breaks for object::Tk*. Perhaps these
@@ -78,7 +86,7 @@ static VALUE t_get_flags(VALUE self, VALUE obj)
 
 // Helper for t_get_m_tbl().
 int record_method(st_data_t key, st_data_t value, VALUE hash) {
-  // @todo: Store something useful in the values.
+  // @todo: Store something useful in the values?
   rb_hash_aset(hash, key == ID_ALLOCATOR ? rb_str_new2("<Allocator>") : ID2SYM(key), INT2FIX(666));
   return ST_CONTINUE;
 }
@@ -110,13 +118,101 @@ static VALUE t_get_address(VALUE self, VALUE obj)
   return INT2NUM(obj);
 }
 
-/**
- * Gets the Ruby's engine type of a variable.
- */
-static VALUE t_get_type(VALUE self, VALUE obj)
-{
-  return INT2NUM(TYPE(obj));
+// {{{ Locating methods
+
+#include "node.h"
+
+#define RSTR(s) rb_str_new2(s)
+
+static t_do_locate_method(NODE *ND_method) {
+  NODE *ND_scope = NULL, *ND_block = NULL;
+  VALUE place;
+  char line_s[20];
+  
+  //
+  // The NODE_METHOD node
+  //
+
+  if (nd_type(ND_method) != NODE_METHOD/*0*/) {
+    return RSTR("I'm expecting a NODE_METHOD here...");
+  }
+  
+  //
+  // The NODE_SCOPE node
+  //
+  
+  ND_scope = ND_method->u2.node;
+
+  if (nd_type(ND_scope) == NODE_CFUNC/*2*/) {
+    return RSTR("That's a C function");
+  }
+  
+  if (nd_type(ND_scope) == NODE_ATTRSET/*89*/) {
+    return RSTR("That's an attr setter");
+  }
+
+  if (nd_type(ND_scope) == NODE_FBODY/*1*/) {
+    return RSTR("That's an alias");
+  }
+  
+  if (nd_type(ND_scope) == NODE_ZSUPER/*41*/) {
+    // @todo The DateTime clas has a lot of these.
+    return RSTR("That's a ZSUPER, whatver the heck it means!");
+  }
+
+  if (nd_type(ND_scope) != NODE_SCOPE/*3*/) {
+    printf("I'm expecting a NODE_SCOPE HERE (got %d instead)\n", nd_type(ND_scope));
+    return RSTR("I'm expecting a NODE_SCOPE HERE...");
+  }
+  
+  //
+  // The NODE_BLOCK node
+  //
+  
+  ND_block = ND_scope->u3.node;
+
+  if (nd_type(ND_block) != NODE_BLOCK/*4*/) {
+    return RSTR("I'm expecting a NODE_BLOCK here...");
+  }
+  
+  sprintf(line_s, "%d:", nd_line(ND_block));
+  place = RSTR(line_s);
+  rb_str_cat2(place, ND_block->nd_file);
+  
+  return place;
 }
+
+/*
+ *  call-seq:
+ *     Drx.locate_method(Date, "to_s")  => str
+ *  
+ *  Locates the filename and line-number where a method was defined. Returns a
+ *  string of the form "89:/path/to/file.rb", or nil if method doens't exist.
+ *  If the method exist but isn't a Ruby method (i.e., if it's written in C),
+ *  the string returned will include an erorr message, e.g. "That's a C
+ *  function".
+ */
+static VALUE t_locate_method(VALUE self, VALUE obj, VALUE method_name)
+{
+  const char *c_name;
+  NODE *method_node;
+
+  if (TYPE(obj) != T_CLASS && TYPE(obj) != T_ICLASS && TYPE(obj) != T_MODULE) {
+    rb_raise(rb_eTypeError, "Only T_CLASS/T_MODULE is expected as the argument (got %d)", TYPE(obj));
+  }
+  if (!RCLASS(obj)->m_tbl) {
+    return Qnil;
+  }
+  c_name = StringValuePtr(method_name);
+  ID id = rb_intern(c_name);
+  if (st_lookup(RCLASS(obj)->m_tbl, id, &method_node))  {
+    return t_do_locate_method(method_node);
+  } else {
+    return Qnil;
+  }
+}
+
+// }}}
 
 VALUE mDrx;
 
@@ -130,6 +226,7 @@ void Init_drx_ext() {
   rb_define_module_function(mDrx, "get_address", t_get_address, 1);
   rb_define_module_function(mDrx, "get_type", t_get_type, 1);
   rb_define_module_function(mDrx, "get_ivar", t_get_ivar, 2);
+  rb_define_module_function(mDrx, "locate_method", t_locate_method, 2);
   rb_define_const(mDrx, "FL_SINGLETON", INT2FIX(FL_SINGLETON));
   rb_define_const(mDrx, "T_OBJECT", INT2FIX(T_OBJECT));
   rb_define_const(mDrx, "T_CLASS", INT2FIX(T_CLASS));

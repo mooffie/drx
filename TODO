@@ -1,3 +1,10 @@
 
+== Misc
+
 * 'drxtk.rb' emits warnings with '-w'. That probably isn't my fault.
-* Allow calling Drx.see() multiple times in one sitting.
+* Make sure the C extension compiles in C++ mode. And get rid of that warning.
+* Cleanup 'drxtk.rb'
+
+== Bugs
+
+Nothing noteworthy, I think.

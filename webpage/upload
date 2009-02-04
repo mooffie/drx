@@ -1,3 +1,4 @@
 scp index.html mooffie@rubyforge.org:/var/www/gforge-projects/drx/
 scp index.css mooffie@rubyforge.org:/var/www/gforge-projects/drx/
 scp screenshot1.png mooffie@rubyforge.org:/var/www/gforge-projects/drx/
+scp screenshot2.png mooffie@rubyforge.org:/var/www/gforge-projects/drx/

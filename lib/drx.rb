@@ -14,6 +14,12 @@ module Drx
   end
 end
 
+class Object
+  def see
+   Drx.see(self)
+  end
+end
+
 # Contains a simple utility function, Drx::examine.
 
 module Drx

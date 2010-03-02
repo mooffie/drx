@@ -1,5 +1,19 @@
 require 'drx_ext' # Load the C extension
 
+module Drx
+  def self.see_using_tk(obj)
+    require 'drx/tk/app'
+    app = Drx::TkGUI::DrxWindow.new
+    app.see(obj)
+    app.run
+  end
+
+  # easier to type...
+  def self.see(obj)
+    see_using_tk(obj)
+  end
+end
+
 # Contains a simple utility function, Drx::examine.
 
 module Drx

@@ -1,18 +1,4 @@
-require 'drx'
 require 'tk'
-
-module Drx
-  def self.examinetk(obj)
-    app = Drx::TkGUI::DrxWindow.new
-    app.see(obj)
-    app.run
-  end
-
-  # easier to type...
-  def self.see(obj)
-    examinetk(obj)
-  end
-end
 
 module Drx
   module TkGUI

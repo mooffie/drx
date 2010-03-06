@@ -21,5 +21,5 @@ end
 
 post = Post.new
 
-require 'drxtk'
+require 'drx'
 Drx.see(post)

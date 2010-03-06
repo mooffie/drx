@@ -1,8 +1,9 @@
 require 'tk'
+require 'drx/tk/imagemap'
 
 module Drx
   module TkGUI
-   
+
     # The 'DRX_EDITOR_COMMAND' environment variable overrides this.
     EDITOR_COMMAND = 'gedit +%d "%s"'
 
@@ -28,6 +29,9 @@ module Drx
       def the_list
         @the_list
       end
+      def winfo_reqwidth
+        return the_list.winfo_reqwidth + 10
+      end
     end
 
     class ::TkListbox
@@ -52,30 +56,43 @@ module Drx
           text 'Type some code to eval in the context of the selected object; prepend with "see" to examine it.'
           pack(:side => 'bottom', :fill => 'both')
         }
-        @list = (ScrolledListbox.new(root) {
-          pack :side => 'left', :fill => 'both', :expand => true
-        }).the_list
-        @list.width 52
-        @list.height 25
-        @list.focus
-        @varsbox = (ScrolledListbox.new(root) {
-          pack :side => 'left', :fill => 'both', :expand => true
-        }).the_list
-        @methodsbox = (ScrolledListbox.new(root) {
-          pack :side => 'left', :fill => 'both', :expand => true
-        }).the_list
 
-        @list.bind('<ListboxSelect>') {
-          @current_object = @objs[@list.get_index]
-          display_variables(current_object)
-          display_methods(current_object)
+        @panes = TkPanedwindow.new(root, :orient => :horizontal)
+        @panes.pack(:side => :top, :expand => true, :fill=> :both, :pady => 2, :padx => '2m')
+
+        @im = TkImageMap::ImageMap.new(@panes)
+        @panes.add(@im, :minsize => 400)
+        @im.select_command { |url|
+          if url
+            puts 'clicked: ' + @objs[url].repr
+            select_object @objs[url].the_object
+          else
+            puts 'cleared'
+            select_object nil
+          end
         }
-        @list.bind('ButtonRelease-3') {
+        @im.double_select_command { |url|
+          puts 'going to ' + url
+          navigate_to_selected
+        }
+        @im.bind('ButtonRelease-3') {
           back
         }
-        @list.bind('Double-Button-1') {
-          descend_iclass
-        }
+
+        @varsbox = (ScrolledListbox.new(@panes) {
+          #pack :side => 'left', :fill => 'both', :expand => true
+        })
+        @varsbox.the_list.width 25
+        @panes.add(@varsbox, :minsize => @varsbox.winfo_reqwidth)
+        @varsbox = @varsbox.the_list
+
+        @methodsbox = (ScrolledListbox.new(@panes) {
+          #pack :side => 'left', :fill => 'both', :expand => true
+        })
+        @methodsbox.the_list.width 35
+        @panes.add(@methodsbox, :minsize => @methodsbox.winfo_reqwidth)
+        @methodsbox = @methodsbox.the_list
+
         @varsbox.bind('<ListboxSelect>') {
           print "\n== Variable #{@varsbox.get_selection}\n\n"
           p selected_var
@@ -108,7 +125,7 @@ module Drx
       end
 
       def locate_method(obj, method_name)
-        place = Drx.locate_method(obj, method_name)
+        place = ObjInfo.new(obj).locate_method(method_name)
         if !place
           puts "Method #{method_name} doesn't exist"
         else
@@ -128,7 +145,7 @@ module Drx
       end
 
       def selected_var
-        Drx.get_ivar(current_object, @varsbox.get_selection)
+        ObjInfo.new(current_object).__get_ivar(@varsbox.get_selection)
       end
 
       def eval_code
@@ -150,50 +167,68 @@ module Drx
         end
       end
 
+      # Fills the variables listbox with a list of the object's instance variables.
       def display_variables(obj)
         @varsbox.delete('0', 'end')
-        if (Drx.has_iv_tbl(obj)) 
-          vars = Drx.get_iv_tbl(obj).keys.map do |v| v.to_s end.sort
+        info = ObjInfo.new(obj)
+        if obj and info.has_iv_tbl?
+          vars = info.iv_tbl.keys.map do |v| v.to_s end.sort
           # Get rid of gazillions of Tk classes:
           vars = vars.reject { |v| v =~ /Tk|Ttk/ }
           @varsbox.insert('end', *vars)
         end
       end
-      
+
+      # Fills the methods listbox with a list of the object's methods.
       def display_methods(obj)
         @methodsbox.delete('0', 'end')
-        if (Drx.is_class_like(obj)) 
-          methods = Drx.get_m_tbl(obj).keys.map do |v| v.to_s end.sort
+        info = ObjInfo.new(obj)
+        if obj and info.class_like?
+          methods = info.m_tbl.keys.map do |v| v.to_s end.sort
           @methodsbox.insert('end', *methods)
         end
       end
-      
-      def display_hierarchy(obj)
-        @list.delete('0', 'end')
-        @objs = []
-        Drx.examine(obj) do |line, o|
-          @list.insert('end', line)
-          @objs << o
+
+      # Loads the imagemap widget with a diagram of the object.
+      def display_graph(obj)
+        @objs = {}
+        files = ObjInfo.new(obj).get_diagram do |info|
+          @objs[info.dot_url] = info
         end
+        @im.image = files['gif']
+        @im.image_map = files['map']
+      ensure
+        files.unlink if files
       end
-      
-      def see(obj)
+
+      # Makes `obj` the primary object seen (the one who is the root of the diagram).
+      def navigate_to(obj)
         @current_object = obj
         @stack << obj
-        display_hierarchy(obj)
-        display_variables(obj)
-        display_methods(obj)
+        display_graph(obj)
+        # Trigger the update of the variables and methods tables by selecting this object
+        # in the imagemap.
+        @im.active_url = @im.urls.first
       end
-      
-      def descend_iclass
+      alias see navigate_to
+
+      # Make `obj` the selected object. That is, the one the variable and method boxes reflect.
+      def select_object(obj)
+         @current_object = obj
+         display_variables(current_object)
+         display_methods(current_object)
+      end
+
+      # Navigate_to the selected object.
+      def navigate_to_selected
         # current_object() descends T_ICLASS for us.
-        see(current_object)
+        navigate_to(current_object)
       end
 
       def run
         # @todo Skip this if Tk is already running.
         Tk.mainloop
-        Tk.restart # So that Tk doesn't complain 'can't invoke "frame" command:  application has been destroyed' next time.
+        Tk.restart # So that Tk doesn't complain 'can't invoke "frame" command: application has been destroyed' next time.
       end
     end
 

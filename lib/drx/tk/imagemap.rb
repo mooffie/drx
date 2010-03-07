@@ -184,14 +184,17 @@ module TkImageMap
 
   module Utils
 
-    # DOT doesn't produce oval elements. Instead, it produces polygons with many many sides.
-    # Here we convert such polygons to ovals.
-    #
-    # @todo: make it really so.
-    def self.to_oval(_pts)
-      points = _pts.enum_slice(2).to_a
+    # DOT outputs oval elements as polygons with many many sides. Since Tk doesn't
+    # draw them well, we convert such polygons to ovals.
+    def self.to_oval(coords)
+      points = coords.enum_slice(2).to_a
+      if points.size < 10
+        # If there are few sides, we assume it's a real polygon.
+        return nil
+      end
       x_min, x_max = points.map {|p| p[0]}.minmax
       y_min, y_max = points.map {|p| p[1]}.minmax
+      # @todo: try to figure out if the points trace a circle?
       #center_x = x_min + (x_max - x_min) / 2.0
       #center_y = y_min + (y_max - y_min) / 2.0
       #points.each do |x,y|
@@ -228,6 +231,13 @@ module TkImageMap
             hotspots << {
               :args => coords,
               :class => TkcRectangle,
+              :url => url,
+            }
+          when 'circle';
+            cx, cy, radius = coords
+            hotspots << {
+              :args => [cx - radius, cy - radius, cx + radius, cy + radius],
+              :class => TkcOval,
               :url => url,
             }
           else raise "I don't support shape '#{attrs['shape']}'"

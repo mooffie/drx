@@ -14,6 +14,23 @@ module Drx
       "http://server/obj/#{dot_id}"
     end
 
+    # Returns the DOT style for the node.
+    def style
+      if singleton?
+        # A singleton class
+        "shape=egg,color=lightblue1,style=filled"
+      elsif t_class?
+        # A class
+        "shape=oval,color=lightblue1,style=filled"
+      elsif t_iclass? or t_module?
+        # A module
+        "shape=box,color=aquamarine,style=filled"
+      else
+        # Else: a "normal" object, or an immediate.
+        "shape=house,color=wheat1,style=filled"
+      end
+    end
+
     def dot_source(level = 0, title = '', &block) # :yield:
       out = ''
       # Note: since 'obj' may be a T_ICLASS, it doesn't repond to many methods,
@@ -33,7 +50,7 @@ module Drx
       @@seen[address] = true
 
       if not seen
-        out << "#{dot_id} [shape=oval, label=\"#{repr}\", URL=\"#{dot_url}\"];" "\n"
+        out << "#{dot_id} [#{style}, label=\"#{repr}\", URL=\"#{dot_url}\"];" "\n"
       end
 
       if seen
@@ -52,15 +69,13 @@ module Drx
         if spr = self.super
           out << spr.dot_source(level+1, '[super]', &block)
           if [Module, ObjInfo.new(Module).klass.the_object].include? the_object
-            out << "#{dot_id} -> #{spr.dot_id} [color=red, weight=0];" "\n"
+            # We don't want these relatively insignificant lines to clutter the display,
+            # so we paint them lightly and tell DOT they aren't to affect the layout (width=0).
+            out << "#{dot_id} -> #{spr.dot_id} [color=gray85, weight=0];" "\n"
           else
             out << "#{dot_id} -> #{spr.dot_id};" "\n"
           end
         end
-      end
-
-      if t_iclass?
-        out << "#{dot_id} [shape=box];" "\n"
       end
 
       # Dipslaying a T_ICLASS's klass isn't very useful, because the data

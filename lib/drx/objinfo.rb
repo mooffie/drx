@@ -93,8 +93,11 @@ module Drx
     def repr
       if t_iclass?
         'include ' + klass.repr
+      elsif singleton?
+        attached = __get_ivar('__attached__') || self
+        attached.inspect + " 'S"
       else
-        @obj.inspect + (singleton? ? " 'S" : "")
+        @obj.inspect
       end
     end
 

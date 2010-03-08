@@ -1,8 +1,6 @@
 
 == Misc
 
-* Inspecing strings/hashes: show a trimmed #inspect'ion. TODO: quote strings for DOT.
-
 * The 'Colored' module: we can't open in editor most of its methods.
 
 * Switching back to the app from the editor unselects the object: because CTRL is pressed...

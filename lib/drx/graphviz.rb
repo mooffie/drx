@@ -14,8 +14,14 @@ module Drx
       "http://server/obj/#{dot_id}"
     end
 
+    # Quotes a string to be used in DOT source.
+    def dot_quote(s)
+      # @todo: find the documentation for tr()?
+      '"' + s.gsub('\\') { '\\\\' }.gsub('"', '\\"').gsub("\n", '\\n') + '"'
+    end
+
     # Returns the DOT style for the node.
-    def style
+    def dot_style
       if singleton?
         # A singleton class
         "shape=egg,color=lightblue1,style=filled"
@@ -28,6 +34,21 @@ module Drx
       else
         # Else: a "normal" object, or an immediate.
         "shape=house,color=wheat1,style=filled"
+      end
+    end
+
+    # Returns the DOT label for the node.
+    def dot_label(max = 20)
+      if class_like?
+        repr
+      else
+        # The representation may be quite big, so we trim it.
+        r = repr
+        if r.length > max
+          r[0, max] + ' ...'
+        else
+          r
+        end
       end
     end
 
@@ -50,7 +71,7 @@ module Drx
       @@seen[address] = true
 
       if not seen
-        out << "#{dot_id} [#{style}, label=\"#{repr}\", URL=\"#{dot_url}\"];" "\n"
+        out << "#{dot_id} [#{dot_style}, label=#{dot_quote dot_label}, URL=#{dot_quote dot_url}];" "\n"
       end
 
       if seen

@@ -52,7 +52,7 @@ module Drx
       end
     end
 
-    def dot_source(level = 0, title = '', &block) # :yield:
+    def dot_source(level = 0, &block) # :yield:
       out = ''
       # Note: since 'obj' may be a T_ICLASS, it doesn't repond to many methods,
       # including is_a?. So when we're querying things we're using Drx calls
@@ -65,8 +65,6 @@ module Drx
         @@seen = {}
       end
 
-      line = ('  ' * level) + title + ' ' + repr
-
       seen = @@seen[address]
       @@seen[address] = true
 
@@ -74,21 +72,13 @@ module Drx
         out << "#{dot_id} [#{dot_style}, label=#{dot_quote dot_label}, URL=#{dot_quote dot_url}];" "\n"
       end
 
-      if seen
-        line += " [seen]"
-      end
-
-      if block_given?
-        yield self
-      else
-#        puts line
-      end
+      yield self if block_given?
 
       return '' if seen
 
       if class_like?
         if spr = self.super
-          out << spr.dot_source(level+1, '[super]', &block)
+          out << spr.dot_source(level+1, &block)
           if [Module, ObjInfo.new(Module).klass.the_object].include? the_object
             # We don't want these relatively insignificant lines to clutter the display,
             # so we paint them lightly and tell DOT they aren't to affect the layout (width=0).
@@ -104,7 +94,7 @@ module Drx
       if not t_iclass?
         # Displaying a singletone's class is confusing and usually unneeded.
         if not singleton?
-          out << klass.dot_source(level+1, '[klass]', &block)
+          out << klass.dot_source(level+1, &block)
           out << "#{dot_id} -> #{klass.dot_id} [style=dotted];" "\n"
           out << "{ rank=same; #{dot_id}; #{klass.dot_id}; }" "\n"
         end

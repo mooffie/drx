@@ -1,6 +1,6 @@
 # Bootstraps the library and defines some utility functions for the end-user.
 
-require 'drx_ext' # The C extension.
+require 'drx_core' # The C extension.
 require 'drx/objinfo'
 require 'drx/graphviz'
 

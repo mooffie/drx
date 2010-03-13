@@ -1,2 +1,2 @@
 require 'mkmf'
-create_makefile("drx_ext")
+create_makefile("drx_core")

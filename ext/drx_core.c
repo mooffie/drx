@@ -215,21 +215,23 @@ static VALUE t_locate_method(VALUE self, VALUE obj, VALUE method_name)
 // }}}
 
 VALUE mDrx;
+VALUE mCore;
 
-void Init_drx_ext() {
-  mDrx = rb_define_module("Drx");
-  rb_define_module_function(mDrx, "get_iv_tbl", t_get_iv_tbl, 1);
-  rb_define_module_function(mDrx, "get_m_tbl", t_get_m_tbl, 1);
-  rb_define_module_function(mDrx, "get_super", t_get_super, 1);
-  rb_define_module_function(mDrx, "get_klass", t_get_klass, 1);
-  rb_define_module_function(mDrx, "get_flags", t_get_flags, 1);
-  rb_define_module_function(mDrx, "get_address", t_get_address, 1);
-  rb_define_module_function(mDrx, "get_type", t_get_type, 1);
-  rb_define_module_function(mDrx, "get_ivar", t_get_ivar, 2);
-  rb_define_module_function(mDrx, "locate_method", t_locate_method, 2);
-  rb_define_const(mDrx, "FL_SINGLETON", INT2FIX(FL_SINGLETON));
-  rb_define_const(mDrx, "T_OBJECT", INT2FIX(T_OBJECT));
-  rb_define_const(mDrx, "T_CLASS", INT2FIX(T_CLASS));
-  rb_define_const(mDrx, "T_ICLASS", INT2FIX(T_ICLASS));
-  rb_define_const(mDrx, "T_MODULE", INT2FIX(T_MODULE));
+void Init_drx_core() {
+  mDrx  = rb_define_module("Drx");
+  mCore = rb_define_module_under(mDrx, "Core");
+  rb_define_module_function(mCore, "get_iv_tbl", t_get_iv_tbl, 1);
+  rb_define_module_function(mCore, "get_m_tbl", t_get_m_tbl, 1);
+  rb_define_module_function(mCore, "get_super", t_get_super, 1);
+  rb_define_module_function(mCore, "get_klass", t_get_klass, 1);
+  rb_define_module_function(mCore, "get_flags", t_get_flags, 1);
+  rb_define_module_function(mCore, "get_address", t_get_address, 1);
+  rb_define_module_function(mCore, "get_type", t_get_type, 1);
+  rb_define_module_function(mCore, "get_ivar", t_get_ivar, 2);
+  rb_define_module_function(mCore, "locate_method", t_locate_method, 2);
+  rb_define_const(mCore, "FL_SINGLETON", INT2FIX(FL_SINGLETON));
+  rb_define_const(mCore, "T_OBJECT", INT2FIX(T_OBJECT));
+  rb_define_const(mCore, "T_CLASS", INT2FIX(T_CLASS));
+  rb_define_const(mCore, "T_ICLASS", INT2FIX(T_ICLASS));
+  rb_define_const(mCore, "T_MODULE", INT2FIX(T_MODULE));
 }

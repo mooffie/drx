@@ -160,8 +160,10 @@ module Drx
         # For some reason, even though ICLASS contains a copy of the iv_tbl of
         # its 'klass', these variables are all nil. I think in all cases we'd
         # want to see the module itself, so that's what we're going to do:
-        if Drx.get_type(@current_object) == Drx::T_ICLASS
-          Drx.get_klass(@current_object)
+        info = Drx::ObjInfo.new(@current_object)
+        if info.t_iclass?
+          # The following line is equivalent to 'Core::get_klass(@current_object)'
+          info.klass.the_object
         else
           @current_object
         end

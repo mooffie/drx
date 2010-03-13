@@ -12,11 +12,11 @@ module Drx
   class ObjInfo
     def initialize(obj)
       @obj = obj
-      @type = Drx.get_type(@obj)
+      @type = Core::get_type(@obj)
     end
 
     def address
-      Drx.get_address(@obj)
+      Core::get_address(@obj)
     end
 
     def the_object
@@ -26,17 +26,17 @@ module Drx
     # Returns true if this object is either a class or a module.
     # When true, you know it has 'm_tbl' and 'super'.
     def class_like?
-      [T_CLASS, T_ICLASS, T_MODULE].include? @type
+      [Core::T_CLASS, Core::T_ICLASS, Core::T_MODULE].include? @type
     end
 
     # Returns the method-table of an object.
     def m_tbl
-      Drx.get_m_tbl(@obj)
+      Core::get_m_tbl(@obj)
     end
 
     # Returns the source-code position where a method is defined.
     def locate_method(method_name)
-      Drx.locate_method(@obj, method_name)
+      Core::locate_method(@obj, method_name)
     end
 
     def has_iv_tbl?
@@ -46,37 +46,37 @@ module Drx
     # Returns the variable-table of an object.
     def iv_tbl
       return nil if not has_iv_tbl?
-      Drx.get_iv_tbl(@obj)
+      Core::get_iv_tbl(@obj)
     end
 
     # @todo: this could be nicer. perhaps define an [] accessor.
     def __get_ivar(name)
-      Drx.get_ivar(@obj, name)
+      Core::get_ivar(@obj, name)
     end
 
     def singleton?
-      class_like? && (Drx.get_flags(@obj) & Drx::FL_SINGLETON).nonzero?
+      class_like? && (Core::get_flags(@obj) & Core::FL_SINGLETON).nonzero?
     end
 
     def t_iclass?
-      @type == T_ICLASS
+      @type == Core::T_ICLASS
     end
 
     def t_class?
-      @type == T_CLASS
+      @type == Core::T_CLASS
     end
 
     def t_object?
-      @type == T_OBJECT
+      @type == Core::T_OBJECT
     end
 
     def t_module?
-      @type == T_MODULE
+      @type == Core::T_MODULE
     end
 
     # Note: the klass of an iclass is the included module.
     def klass
-      ObjInfo.new Drx.get_klass(@obj)
+      ObjInfo.new Core::get_klass(@obj)
     end
 
     # Returns the 'super' of a class-like object. Returns nil for end of chain.
@@ -84,7 +84,7 @@ module Drx
     # Examples: Kernel has a NULL super. Modules too have NULL super, unless
     # when 'include'ing.
     def super
-      spr = Drx.get_super(@obj)
+      spr = Core::get_super(@obj)
       # Note: we can't do 'if spr.nil?' because T_ICLASS doesn't "have" #nil.
       spr ? ObjInfo.new(spr) : nil
     end

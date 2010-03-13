@@ -37,8 +37,8 @@ examining the Ruby interpreter internal nodes.)</li>
 
 <h2>Usage</h2>
 
-<p>Just <code>require 'drxtk'</code> in your program and do
-<code>Drx.see(some_object)</code> to investigate that object.</p>
+<p>Just <code>require 'drx'</code> in your program and do
+<code>some_object.see</code> to investigate that object.</p>
 
 <h2>Requirements</h2>
 
@@ -65,7 +65,7 @@ require 'dm-core'
 class Post
   include DataMapper::Resource
  
-  property :post_id,  Integer, :serial => true
+  property :post_id,  Serial
   property :title,    String
   property :body,     Text
   
@@ -75,7 +75,7 @@ end
 class User
   include DataMapper::Resource
  
-  property :user_uid,  Integer, :serial => true
+  property :user_uid,  Serial
   property :name,      String
   property :mail,      String
 end
@@ -86,8 +86,8 @@ end
 <pre>
 post = Post.new
 
-require 'drxtk'
-Drx.see(post)
+require 'drx'
+post.see
 </pre>
 
 <p>...and you'd get the window shown in the screenshot above (click to
@@ -163,31 +163,39 @@ the 'iv_tbl', and the 'm_tbl'.</p>
 
 <h2>Key bindings</h2>
 
-<p>There are three panes. We'll call them /hierarchy/, /vars/, /methods/.</p>
+<dl>
 
-<ul>
+<dt>The hierarchy pane</dt>
+<dd>
+  <ul>
+  <li>Left-click on an object in the diagram to select this object. This updates the variables and methods panes to reflect this object.</li>
+  <li>Right-click to move back in history.</li>
+  <li>Double Left-click on an object in the diagram to make this object the tip of the diagram. This
+      is only needed if want to see the 'klass' of an included module (in
+      other words, if you want to see "the singleton of a module"), because
+      this singleton is the 'klass' of an 'ICLS (anonymous class) and the UI
+      by default doesn't show it to prevent clutter.</li>
+  </li>
+  </ul>
+</dd>
 
-<li>Left-click on an object in the /hierarchy/ pane to update the /vars/
-and /methods/ panes.</li>
+<dt>The variables pane</dt>
+<dd>
+  <ul>
+  <li>Double left-click on a variable to "see" it.</li>
+  <li>Left-click on a variable to p() it.</li>
+  <li>Right-click on a variable to pp() it.</li>
+  </ul>
+</dd>
 
-<li>Left-click a var in /vars/ to p() this var.</li>
+<dt>The methods pane</dt>
+<dd>
+  <ul>
+  <li>Double-click on a method to bring up an editor showing it.</li>
+  </ul>
+</dd>
 
-<li>Right-click a var in /vars/ to pp() this var.</li>
-
-<li>Double Left-click a var in /vars/ to open it.</li>
-
-<li>Right-click in /hierarchy/ to move back in history.</li>
-
-<li>Double-click a method in /methods/ to bring up an editor showing
-this method.</li>
-
-<li>Double Left-click on an object in the /hierarchy/ to open it. This
-is only needed if want to see the 'klass' of an included module (in
-other words, if you want to see "the singleton of a module"), because
-this singleton is the 'klass' of an 'ICLS (anonymous class) and the UI
-by default doesn't show it to prevent clutter.</li>
-
-</ul>
+</dl>
 
 <h2>Launching an editor</h2>
 

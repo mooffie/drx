@@ -16,8 +16,8 @@ def zmn.koko
  9090
 end
 
-Drx.examine(zmn)
+Drx::ObjInfo.new(zmn).examine
 
 #############################
 
-Drx.see(zmn)
+zmn.see

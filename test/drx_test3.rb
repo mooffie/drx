@@ -32,4 +32,4 @@ def o.unq
   def g;end
 end
 
-Drx.see o
+o.see

@@ -4,7 +4,7 @@ require 'dm-core'
 class Post
   include DataMapper::Resource
  
-  property :post_id,  Integer, :serial => true
+  property :post_id,  Serial
   property :title,    String
   property :body,     Text
   
@@ -14,7 +14,7 @@ end
 class User
   include DataMapper::Resource
  
-  property :user_uid,  Integer, :serial => true
+  property :user_uid,  Serial
   property :name,      String
   property :mail,      String
 end
@@ -22,4 +22,5 @@ end
 post = Post.new
 
 require 'drx'
-Drx.see(post)
+post.see
+

@@ -3,6 +3,10 @@
 
 * The 'Colored' module: we can't open in editor most of its methods.
 
+* Write a "frames" layout manager. It's tedious to use gazilions of TkFrames/TkPanedwindows.
+
+* get_diagram(): would be cleaner if it gets the 'files' as an argument. Tempfiles' constructor should get a block and clean after itself.
+
 * Switching back to the app from the editor unselects the object: because CTRL is pressed...
 
 * Drx::* --> Drx::Core::*
@@ -10,6 +14,10 @@
 * 'drxtk.rb' emits warnings with '-w'. That probably isn't my fault.
 
 * Make sure the C extension compiles in C++ mode. And get rid of that warning.
+
+== Features
+
+* Have a textarea where output from eval()/p()/etc goes.
 
 == Bugs
 

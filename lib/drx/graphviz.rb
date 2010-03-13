@@ -118,8 +118,28 @@ module Drx
       files = Tempfiles.new('drx')
       source = self.dot_source(&block)
       File.open(files['dot'], 'w') { |f| f.write(source) }
-      command = 'dot "%s" -Tgif -o "%s" -Tcmapx -o "%s"' % [files['dot'], files['gif'], files['map']]
-      system(command)
+
+      # Note: Windows's CMD.EXE too supports "2>&1" (However, this is not
+      # supported on good old Windows 98).
+      command = 'dot "%s" -Tgif -o "%s" -Tcmapx -o "%s" 2>&1' % [files['dot'], files['gif'], files['map']]
+
+      message = Kernel.`(command)  # `
+      if $? != 0
+        error = <<-EOS % [command, message]
+ERROR: Failed to run the 'dot' command. Make sure you have the GraphViz
+package installed and that its bin folder appears in your PATH.
+
+The command I tried to execute is this:
+
+%s
+
+And the response I got is this:
+
+%s
+        EOS
+        raise error
+      end
+
       return files
     end
 

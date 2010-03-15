@@ -7,30 +7,33 @@ module Drx
     # The 'DRX_EDITOR_COMMAND' environment variable overrides this.
     EDITOR_COMMAND = 'gedit +%d "%s"'
 
-    class ScrolledListbox < TkFrame
-      def initialize(*args, &block)
-        super(*args, &block)
-        @the_list = the_list = TkListbox.new(self) {
-          #pack :side => 'left'#, :expand => 'true', :fill => 'both'
-        }
-        TkScrollbar.new(self) { |s|
-          pack :side => 'right', :fill => 'y'
-          command { |*args| the_list.yview *args }
-          the_list.yscrollcommand { |first,last| s.set first,last }
-        }
-        TkScrollbar.new(self) { |s|
-          orient 'horizontal'
-          pack :side => 'bottom', :fill => 'x'
-          command { |*args| the_list.xview *args }
-          the_list.xscrollcommand { |first,last| s.set first,last }
-        }
-        @the_list.pack(:side => 'left', :expand => 'true', :fill => 'both')
+    class Scrolled < TkFrame
+      def initialize(parent, the_widget, opts = { :vertical => true, :horizontal => true })
+        super(parent)
+        @the_widget = the_widget
+        if opts[:vertical]
+          TkScrollbar.new(self) { |s|
+            pack :side => 'right', :fill => 'y'
+            command { |*args| the_widget.yview *args }
+            the_widget.yscrollcommand { |first,last| s.set first,last }
+          }
+        end
+        if opts[:horizontal]
+          TkScrollbar.new(self) { |s|
+            orient 'horizontal'
+            pack :side => 'bottom', :fill => 'x'
+            command { |*args| the_widget.xview *args }
+            the_widget.xscrollcommand { |first,last| s.set first,last }
+          }
+        end
+        the_widget.raise  # Since the frame is created after the widget, it obscures it by default.
+        the_widget.pack(:in => self, :side => 'left', :expand => 'true', :fill => 'both')
       end
-      def the_list
-        @the_list
+      def the_widget
+        @the_widget
       end
       def winfo_reqwidth
-        return the_list.winfo_reqwidth + 10
+        return the_widget.winfo_reqwidth + 10
       end
     end
 
@@ -83,16 +86,16 @@ module Drx
           back
         }
 
-        @varsbox = ScrolledListbox.new(toplevel)
-        @varsbox.the_list.width 25
+        @varsbox = Scrolled.new(toplevel, TkListbox.new(toplevel))
+        @varsbox.the_widget.width 25
 
-        @methodsbox = ScrolledListbox.new(toplevel)
-        @methodsbox.the_list.width 35
+        @methodsbox = Scrolled.new(toplevel, TkListbox.new(toplevel))
+        @methodsbox.the_widget.width 35
 
         layout_finish
 
-        @methodsbox = @methodsbox.the_list
-        @varsbox = @varsbox.the_list
+        @varsbox = @varsbox.the_widget
+        @methodsbox = @methodsbox.the_widget
 
         @varsbox.bind('<ListboxSelect>') {
           require 'pp'
@@ -121,9 +124,15 @@ module Drx
 
       # Create layout widgets.
       #
-      # A layout widget must be created before the widget it wishes
-      # to control is created (it's a Tk issue); that's why this method
-      # is called early on.
+      # "If the master for a slave is not its parent then you must make sure
+      #  that the slave is higher in the stacking order than the master.
+      #  Otherwise the master will obscure the slave and it will appear as
+      #  if the slave hasn't been packed correctly. The easiest way to make
+      #  sure the slave is higher than the master is to create the master
+      #  window first"
+      #
+      # ...that's why this method is called early on, before we create the
+      # main widgets.
       def layout_begin
         @main_frame = TkPanedwindow.new(toplevel, :orient => :vertical)
         @panes = TkPanedwindow.new(@main_frame, :orient => :horizontal)
@@ -135,7 +144,7 @@ module Drx
         @main_frame.pack(:side => :top, :expand => true, :fill=> :both, :pady => 2, :padx => '2m')
 
         @eval_result.height = 4
-        @eval_result.pack(:in => @eval_combo, :side => 'top', :fill => 'both', :expand => true)
+        Scrolled.new(toplevel, @eval_result, :vertical => true).pack(:in => @eval_combo, :side => 'top', :fill => 'both', :expand => true)
         @eval_entry.pack(:in => @eval_combo, :side => 'bottom', :fill => 'both')
         @eval_label.pack(:in => @eval_combo, :side => 'bottom', :fill => 'both')
 

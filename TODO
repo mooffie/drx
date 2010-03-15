@@ -11,8 +11,6 @@
 
 * Make 'info' darker; add 'comment' style, convert "== Variable xyz" to use it.
 
-* Scrollbar for the result box.
-
 * Print exceptions in the result box.
 
 * get_diagram(): would be cleaner if it gets the 'files' as an argument. Tempfiles' constructor should get a block and clean after itself.

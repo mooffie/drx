@@ -3,7 +3,17 @@
 
 * The 'Colored' module: we can't open in editor most of its methods.
 
-* Write a "frames" layout manager. It's tedious to use gazilions of TkFrames/TkPanedwindows.
+* eval() in the context of the "tip" object, not the selected one.
+
+* Descriptive labels for the three panes.
+
+* Clicking an empty listbox results in error.
+
+* Make 'info' darker; add 'comment' style, convert "== Variable xyz" to use it.
+
+* Scrollbar for the result box.
+
+* Print exceptions in the result box.
 
 * get_diagram(): would be cleaner if it gets the 'files' as an argument. Tempfiles' constructor should get a block and clean after itself.
 
@@ -15,7 +25,7 @@
 
 == Features
 
-* Have a textarea where output from eval()/p()/etc goes.
+* History for the eval entry box.
 
 == Bugs
 

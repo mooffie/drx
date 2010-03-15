@@ -45,23 +45,27 @@ module Drx
     end
 
     class DrxWindow
+
+      def toplevel
+        @toplevel ||= TkRoot.new
+      end
+
       def initialize
         @stack = []
-        root = TkRoot.new
-        @evalbox = TkEntry.new(root) {
+
+        layout_begin
+
+        @eval_entry = TkEntry.new(toplevel) {
           font 'Courier'
-          pack(:side => 'bottom', :fill => 'both')
         }
-        TkLabel.new(root, :anchor => 'w') {
+        @eval_result = TkText.new(toplevel) {
+          font 'Courier'
+        }
+        @eval_label = TkLabel.new(toplevel, :anchor => 'w') {
           text 'Type some code to eval in the context of the selected object; prepend with "see" to examine it.'
-          pack(:side => 'bottom', :fill => 'both')
         }
 
-        @panes = TkPanedwindow.new(root, :orient => :horizontal)
-        @panes.pack(:side => :top, :expand => true, :fill=> :both, :pady => 2, :padx => '2m')
-
-        @im = TkImageMap::ImageMap.new(@panes)
-        @panes.add(@im, :minsize => 400)
+        @im = TkImageMap::ImageMap.new(toplevel)
         @im.select_command { |url|
           if url
             puts 'clicked: ' + @objs[url].repr
@@ -79,46 +83,89 @@ module Drx
           back
         }
 
-        @varsbox = (ScrolledListbox.new(@panes) {
-          #pack :side => 'left', :fill => 'both', :expand => true
-        })
+        @varsbox = ScrolledListbox.new(toplevel)
         @varsbox.the_list.width 25
-        @panes.add(@varsbox, :minsize => @varsbox.winfo_reqwidth)
+
+        @methodsbox = ScrolledListbox.new(toplevel)
+        @methodsbox.the_list.width 35
+
+        layout_finish
+
+        @methodsbox = @methodsbox.the_list
         @varsbox = @varsbox.the_list
 
-        @methodsbox = (ScrolledListbox.new(@panes) {
-          #pack :side => 'left', :fill => 'both', :expand => true
-        })
-        @methodsbox.the_list.width 35
-        @panes.add(@methodsbox, :minsize => @methodsbox.winfo_reqwidth)
-        @methodsbox = @methodsbox.the_list
-
         @varsbox.bind('<ListboxSelect>') {
-          print "\n== Variable #{@varsbox.get_selection}\n\n"
-          p selected_var
+          require 'pp'
+          output "\n== Variable #{@varsbox.get_selection}\n\n", 'info'
+          output PP.pp(selected_var, '')
+        }
+        @varsbox.bind('ButtonRelease-3') {
+          output "\n== Variable #{@varsbox.get_selection}\n\n", 'info'
+          output selected_var.inspect + "\n"
         }
         @varsbox.bind('Double-Button-1') {
           see selected_var
         }
-        @varsbox.bind('ButtonRelease-3') {
-          require 'pp'
-          print "\n== Variable #{@varsbox.get_selection}\n\n"
-          pp selected_var
-        }
-        @evalbox.bind('Key-Return') {
-          eval_code
-        }
         @methodsbox.bind('Double-Button-1') {
           locate_method(current_object, @methodsbox.get_selection)
         }
+        @eval_entry.bind('Key-Return') {
+          eval_code
+        }
+
+        @eval_result.tag_configure('error', :foreground => 'red')
+        @eval_result.tag_configure('info', :foreground => 'blue')
+
+        output "Please visit the homepage, http://drx.rubyforge.org/, for usage instructions.\n", 'info'
+      end
+
+      # Create layout widgets.
+      #
+      # A layout widget must be created before the widget it wishes
+      # to control is created (it's a Tk issue); that's why this method
+      # is called early on.
+      def layout_begin
+        @main_frame = TkPanedwindow.new(toplevel, :orient => :vertical)
+        @panes = TkPanedwindow.new(@main_frame, :orient => :horizontal)
+        @eval_combo = TkFrame.new(toplevel)
+      end
+
+      # Arrange the main widgets inside layout widgets.
+      def layout_finish
+        @main_frame.pack(:side => :top, :expand => true, :fill=> :both, :pady => 2, :padx => '2m')
+
+        @eval_result.height = 4
+        @eval_result.pack(:in => @eval_combo, :side => 'top', :fill => 'both', :expand => true)
+        @eval_entry.pack(:in => @eval_combo, :side => 'bottom', :fill => 'both')
+        @eval_label.pack(:in => @eval_combo, :side => 'bottom', :fill => 'both')
+
+        @main_frame.add(@eval_combo)
+
+        # @todo Tk::Tile::PanedWindow doesn't support :minsize ?
+        #@panes.add(@im, :minsize => 400)
+        #@panes.add(@varsbox, :minsize => @varsbox.winfo_reqwidth)
+        #@panes.add(@methodsbox, :minsize => @methodsbox.winfo_reqwidth)
+        @panes.add(@im)
+        @panes.add(@varsbox)
+        @panes.add(@methodsbox)
+
+        @main_frame.add(@panes)
+      end
+
+      # Output some text. It goes to the result textarea.
+      def output(s, tag=nil)
+        @eval_result.insert('end', s, Array(tag))
+        # Scroll to the bottom.
+        @eval_result.mark_set('insert', 'end')
+        @eval_result.see('end')
       end
 
       def open_up_editor(filename, lineno)
         command = sprintf(ENV['DRX_EDITOR_COMMAND'] || EDITOR_COMMAND, lineno, filename)
-        puts "Execting: #{command}..."
+        output "Execting: #{command}...\n", 'info'
         if !fork
           if !Kernel.system(command)
-            puts "Could not execure the command '#{command}'"
+            output "Could not execute the command '#{command}'\n", 'error'
           end
           exit!
         end
@@ -127,12 +174,12 @@ module Drx
       def locate_method(obj, method_name)
         place = ObjInfo.new(obj).locate_method(method_name)
         if !place
-          puts "Method #{method_name} doesn't exist"
+          output "Method #{method_name} doesn't exist\n", 'info'
         else
           if place =~ /\A(\d+):(.*)/
             open_up_editor($2, $1)
           else
-            puts "Can't locate method, because: #{place}"
+            output "Can't locate method, because: #{place}\n", 'info'
           end
         end
       end
@@ -149,10 +196,11 @@ module Drx
       end
 
       def eval_code
-        code = @evalbox.get.strip
+        code = @eval_entry.get.strip
         see = !!code.sub!(/^see\s/, '')
         result = current_object.instance_eval(code)
-        p result
+        output result.inspect + "\n"
+        #require 'pp'; output PP.pp(result, '')
         see(result) if see
       end
 

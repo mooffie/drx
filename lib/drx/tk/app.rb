@@ -8,6 +8,7 @@ module Drx
     # The 'DRX_EDITOR_COMMAND' environment variable overrides this.
     EDITOR_COMMAND = 'gedit +%d "%s"'
 
+    # Wraps scrollbars around a widget.
     class Scrolled < TkFrame
       def initialize(parent, the_widget, opts = { :vertical => true, :horizontal => true })
         super(parent)
@@ -30,19 +31,13 @@ module Drx
         the_widget.raise  # Since the frame is created after the widget, it obscures it by default.
         the_widget.pack(:in => self, :side => 'left', :expand => 'true', :fill => 'both')
       end
-      def the_widget
-        @the_widget
-      end
-      def winfo_reqwidth
-        return the_widget.winfo_reqwidth + 10
-      end
       def raise
         super
-        the_widget.raise
+        @the_widget.raise
       end
     end
 
-    # Arrange widgets one below the other.
+    # Arranges widgets one below the other.
     class VBox < TkFrame
       def initialize(parent, widgets)
         super(parent)
@@ -74,13 +69,12 @@ module Drx
       def initialize
         @stack = []
 
-        layout_begin
-
         @eval_entry = TkEntry.new(toplevel) {
           font 'Courier'
         }
         @eval_result = TkText.new(toplevel) {
           font 'Courier'
+          height 4
           foreground 'black'
           background 'white'
           tag_configure('error', :foreground => 'red')
@@ -105,16 +99,14 @@ module Drx
           back
         }
 
-        @varsbox = Scrolled.new(toplevel, TkListbox.new(toplevel))
-        @varsbox.the_widget.width 25
+        @varsbox = TkListbox.new(toplevel) {
+          width 25
+        }
+        @methodsbox = TkListbox.new(toplevel) {
+          width 35
+        }
 
-        @methodsbox = Scrolled.new(toplevel, TkListbox.new(toplevel))
-        @methodsbox.the_widget.width 35
-
-        layout_finish
-
-        @varsbox = @varsbox.the_widget
-        @methodsbox = @methodsbox.the_widget
+        layout
 
         @varsbox.bind('<ListboxSelect>') {
           require 'pp'
@@ -138,29 +130,15 @@ module Drx
         output "Please visit the homepage, http://drx.rubyforge.org/, for usage instructions.\n", 'info'
       end
 
-      # Create layout widgets.
-      #
-      # "If the master for a slave is not its parent then you must make sure
-      #  that the slave is higher in the stacking order than the master.
-      #  Otherwise the master will obscure the slave and it will appear as
-      #  if the slave hasn't been packed correctly. The easiest way to make
-      #  sure the slave is higher than the master is to create the master
-      #  window first"
-      #
-      # ...that's why this method is called early on, before we create the
-      # main widgets.
-      def layout_begin
-        @main_frame = TkPanedwindow.new(toplevel, :orient => :vertical)
-        @panes = TkPanedwindow.new(@main_frame, :orient => :horizontal)
-      end
-
       # Arrange the main widgets inside layout widgets.
-      def layout_finish
-        @main_frame.pack(:side => :top, :expand => true, :fill=> :both, :pady => 2, :padx => 2)
-
-        @eval_result.height = 4
-
-        @main_frame.add VBox.new toplevel, [
+      def layout
+        main_frame = TkPanedwindow.new(toplevel, :orient => :vertical) {
+          pack :side => :top, :expand => true, :fill=> :both, :pady => 2, :padx => 2
+          # We push layout widgets below the main widgets in the stacking order.
+          # We don't want them to obscure the main ones.
+          lower
+        }
+        main_frame.add VBox.new toplevel, [
           [Scrolled.new(toplevel, @eval_result, :vertical => true), { :expand => true, :fill => 'both' } ],
           TkLabel.new(toplevel, :anchor => 'w') {
             text 'Type some code to eval in the context of the selected object; prepend with "see" to examine it.'
@@ -168,25 +146,23 @@ module Drx
           @eval_entry,
         ]
 
-        # @todo Tk::Tile::PanedWindow doesn't support :minsize ?
-        #@panes.add(@im, :minsize => 400)
-        #@panes.add(@varsbox, :minsize => @varsbox.winfo_reqwidth)
-        #@panes.add(@methodsbox, :minsize => @methodsbox.winfo_reqwidth)
-
-        @panes.add VBox.new toplevel, [
+        panes = TkPanedwindow.new(main_frame, :orient => :horizontal) {
+          lower
+        }
+        panes.add VBox.new toplevel, [
           TkLabel.new(toplevel, :text => 'Object graph (klass and super):', :anchor => 'w'),
           [@im, { :expand => true, :fill => 'both' } ],
         ]
-        @panes.add VBox.new toplevel, [
+        panes.add VBox.new toplevel, [
           TkLabel.new(toplevel, :text => 'Variables (iv_tbl):', :anchor => 'w'),
-          [@varsbox, { :expand => true, :fill => 'both' } ]
+          [Scrolled.new(toplevel, @varsbox), { :expand => true, :fill => 'both' } ]
         ]
-        @panes.add VBox.new toplevel, [
+        panes.add VBox.new toplevel, [
           TkLabel.new(toplevel, :text => 'Methods (m_tbl):', :anchor => 'w'),
-          [@methodsbox, { :expand => true, :fill => 'both' } ]
+          [Scrolled.new(toplevel, @methodsbox), { :expand => true, :fill => 'both' } ]
         ]
 
-        @main_frame.add(@panes)
+        main_frame.add(panes)
       end
 
       # Output some text. It goes to the result textarea.

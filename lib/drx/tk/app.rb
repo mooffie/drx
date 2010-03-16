@@ -36,6 +36,23 @@ module Drx
       def winfo_reqwidth
         return the_widget.winfo_reqwidth + 10
       end
+      def raise
+        super
+        the_widget.raise
+      end
+    end
+
+    # Arrange widgets one below the other.
+    class VBox < TkFrame
+      def initialize(parent, widgets)
+        super(parent)
+        widgets.each { |w, layout|
+          layout = {} if layout.nil?
+          layout = { :in => self, :side => 'top', :fill => 'x' }.merge layout
+          w.raise
+          w.pack(layout)
+        }
+      end
     end
 
     class ::TkListbox
@@ -68,9 +85,6 @@ module Drx
           background 'white'
           tag_configure('error', :foreground => 'red')
           tag_configure('info', :foreground => 'blue')
-        }
-        @eval_label = TkLabel.new(toplevel, :anchor => 'w') {
-          text 'Type some code to eval in the context of the selected object; prepend with "see" to examine it.'
         }
 
         @im = TkImageMap::ImageMap.new(toplevel)
@@ -138,7 +152,6 @@ module Drx
       def layout_begin
         @main_frame = TkPanedwindow.new(toplevel, :orient => :vertical)
         @panes = TkPanedwindow.new(@main_frame, :orient => :horizontal)
-        @eval_combo = TkFrame.new(toplevel)
       end
 
       # Arrange the main widgets inside layout widgets.
@@ -146,19 +159,32 @@ module Drx
         @main_frame.pack(:side => :top, :expand => true, :fill=> :both, :pady => 2, :padx => 2)
 
         @eval_result.height = 4
-        Scrolled.new(toplevel, @eval_result, :vertical => true).pack(:in => @eval_combo, :side => 'top', :fill => 'both', :expand => true)
-        @eval_entry.pack(:in => @eval_combo, :side => 'bottom', :fill => 'both')
-        @eval_label.pack(:in => @eval_combo, :side => 'bottom', :fill => 'both')
 
-        @main_frame.add(@eval_combo)
+        @main_frame.add VBox.new toplevel, [
+          [Scrolled.new(toplevel, @eval_result, :vertical => true), { :expand => true, :fill => 'both' } ],
+          TkLabel.new(toplevel, :anchor => 'w') {
+            text 'Type some code to eval in the context of the selected object; prepend with "see" to examine it.'
+          },
+          @eval_entry,
+        ]
 
         # @todo Tk::Tile::PanedWindow doesn't support :minsize ?
         #@panes.add(@im, :minsize => 400)
         #@panes.add(@varsbox, :minsize => @varsbox.winfo_reqwidth)
         #@panes.add(@methodsbox, :minsize => @methodsbox.winfo_reqwidth)
-        @panes.add(@im)
-        @panes.add(@varsbox)
-        @panes.add(@methodsbox)
+
+        @panes.add VBox.new toplevel, [
+          TkLabel.new(toplevel, :text => 'Object graph (klass and super):', :anchor => 'w'),
+          [@im, { :expand => true, :fill => 'both' } ],
+        ]
+        @panes.add VBox.new toplevel, [
+          TkLabel.new(toplevel, :text => 'Variables (iv_tbl):', :anchor => 'w'),
+          [@varsbox, { :expand => true, :fill => 'both' } ]
+        ]
+        @panes.add VBox.new toplevel, [
+          TkLabel.new(toplevel, :text => 'Methods (m_tbl):', :anchor => 'w'),
+          [@methodsbox, { :expand => true, :fill => 'both' } ]
+        ]
 
         @main_frame.add(@panes)
       end

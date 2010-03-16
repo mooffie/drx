@@ -1,4 +1,5 @@
 require 'tk'
+#Tk.default_widget_set = :Ttk
 require 'drx/tk/imagemap'
 
 module Drx
@@ -63,6 +64,10 @@ module Drx
         }
         @eval_result = TkText.new(toplevel) {
           font 'Courier'
+          foreground 'black'
+          background 'white'
+          tag_configure('error', :foreground => 'red')
+          tag_configure('info', :foreground => 'blue')
         }
         @eval_label = TkLabel.new(toplevel, :anchor => 'w') {
           text 'Type some code to eval in the context of the selected object; prepend with "see" to examine it.'
@@ -116,9 +121,6 @@ module Drx
           eval_code
         }
 
-        @eval_result.tag_configure('error', :foreground => 'red')
-        @eval_result.tag_configure('info', :foreground => 'blue')
-
         output "Please visit the homepage, http://drx.rubyforge.org/, for usage instructions.\n", 'info'
       end
 
@@ -141,7 +143,7 @@ module Drx
 
       # Arrange the main widgets inside layout widgets.
       def layout_finish
-        @main_frame.pack(:side => :top, :expand => true, :fill=> :both, :pady => 2, :padx => '2m')
+        @main_frame.pack(:side => :top, :expand => true, :fill=> :both, :pady => 2, :padx => 2)
 
         @eval_result.height = 4
         Scrolled.new(toplevel, @eval_result, :vertical => true).pack(:in => @eval_combo, :side => 'top', :fill => 'both', :expand => true)

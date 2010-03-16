@@ -207,9 +207,14 @@ module Drx
       def eval_code
         code = @eval_entry.get.strip
         see = !!code.sub!(/^see\s/, '')
-        result = current_object.instance_eval(code)
-        output result.inspect + "\n"
-        #require 'pp'; output PP.pp(result, '')
+        begin
+          result = current_object.instance_eval(code)
+          output result.inspect + "\n"
+        rescue StandardError, ScriptError => ex
+          gist = "%s: %s" % [ex.class, ex.message]
+          trace = ex.backtrace.reverse.drop_while { |line| line !~ /eval_code/ }.reverse
+          output gist + "\n" + trace.join("\n") + "\n", 'error'
+        end
         see(result) if see
       end
 

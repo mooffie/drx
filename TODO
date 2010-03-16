@@ -11,8 +11,6 @@
 
 * Make 'info' darker; add 'comment' style, convert "== Variable xyz" to use it.
 
-* Print exceptions in the result box.
-
 * get_diagram(): would be cleaner if it gets the 'files' as an argument. Tempfiles' constructor should get a block and clean after itself.
 
 * Switching back to the app from the editor unselects the object: because CTRL is pressed...

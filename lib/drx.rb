@@ -8,7 +8,7 @@ module Drx
 
   def self.see_using_tk(obj)
     require 'drx/tk/app'
-    app = Drx::TkGUI::DrxWindow.new
+    app = Drx::TkGUI::Application.new
     app.see(obj)
     app.run
   end

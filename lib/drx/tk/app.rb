@@ -8,59 +8,7 @@ module Drx
     # The 'DRX_EDITOR_COMMAND' environment variable overrides this.
     EDITOR_COMMAND = 'gedit +%d "%s"'
 
-    # Wraps scrollbars around a widget.
-    class Scrolled < TkFrame
-      def initialize(parent, the_widget, opts = { :vertical => true, :horizontal => true })
-        super(parent)
-        @the_widget = the_widget
-        if opts[:vertical]
-          TkScrollbar.new(self) { |s|
-            pack :side => 'right', :fill => 'y'
-            command { |*args| the_widget.yview *args }
-            the_widget.yscrollcommand { |first,last| s.set first,last }
-          }
-        end
-        if opts[:horizontal]
-          TkScrollbar.new(self) { |s|
-            orient 'horizontal'
-            pack :side => 'bottom', :fill => 'x'
-            command { |*args| the_widget.xview *args }
-            the_widget.xscrollcommand { |first,last| s.set first,last }
-          }
-        end
-        the_widget.raise  # Since the frame is created after the widget, it obscures it by default.
-        the_widget.pack(:in => self, :side => 'left', :expand => 'true', :fill => 'both')
-      end
-      def raise
-        super
-        @the_widget.raise
-      end
-    end
-
-    # Arranges widgets one below the other.
-    class VBox < TkFrame
-      def initialize(parent, widgets)
-        super(parent)
-        widgets.each { |w, layout|
-          layout = {} if layout.nil?
-          layout = { :in => self, :side => 'top', :fill => 'x' }.merge layout
-          w.raise
-          w.pack(layout)
-        }
-      end
-    end
-
-    class ::TkListbox
-      def get_selection
-        idx = curselection[0]
-        return get(idx)
-      end
-      def get_index
-        curselection[0]
-      end
-    end
-
-    class DrxWindow
+    class Application
 
       def toplevel
         @toplevel ||= TkRoot.new
@@ -335,6 +283,58 @@ module Drx
       end
       def current
         past_end? ? '' : @entries[@pos]
+      end
+    end
+
+    # Wraps scrollbars around a widget.
+    class Scrolled < TkFrame
+      def initialize(parent, the_widget, opts = { :vertical => true, :horizontal => true })
+        super(parent)
+        @the_widget = the_widget
+        if opts[:vertical]
+          TkScrollbar.new(self) { |s|
+            pack :side => 'right', :fill => 'y'
+            command { |*args| the_widget.yview *args }
+            the_widget.yscrollcommand { |first,last| s.set first,last }
+          }
+        end
+        if opts[:horizontal]
+          TkScrollbar.new(self) { |s|
+            orient 'horizontal'
+            pack :side => 'bottom', :fill => 'x'
+            command { |*args| the_widget.xview *args }
+            the_widget.xscrollcommand { |first,last| s.set first,last }
+          }
+        end
+        the_widget.raise  # Since the frame is created after the widget, it obscures it by default.
+        the_widget.pack(:in => self, :side => 'left', :expand => 'true', :fill => 'both')
+      end
+      def raise
+        super
+        @the_widget.raise
+      end
+    end
+
+    # Arranges widgets one below the other.
+    class VBox < TkFrame
+      def initialize(parent, widgets)
+        super(parent)
+        widgets.each { |w, layout|
+          layout = {} if layout.nil?
+          layout = { :in => self, :side => 'top', :fill => 'x' }.merge layout
+          w.raise
+          w.pack(layout)
+        }
+      end
+    end
+
+    class ::TkListbox
+      def get_selection
+        idx = curselection[0]
+        return get(idx)
+      end
+      def get_index
+        curselection[0]
       end
     end
 

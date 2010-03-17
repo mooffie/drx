@@ -17,9 +17,7 @@
 
 * Cleanups:
   - '@stack' not descriptive
-  - DrxWindow -> Application
   - Are the ::TkListbox tweakings neccesary?
-  - Move layout classes down
 
 == Bugs
 

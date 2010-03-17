@@ -15,9 +15,11 @@
 
 * Make sure the C extension compiles in C++ mode. And get rid of that warning.
 
-== Features
-
-* History for the eval entry box.
+* Cleanups:
+  - '@stack' not descriptive
+  - DrxWindow -> Application
+  - Are the ::TkListbox tweakings neccesary?
+  - Move layout classes down
 
 == Bugs
 

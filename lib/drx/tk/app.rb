@@ -68,6 +68,7 @@ module Drx
 
       def initialize
         @stack = []
+        @eval_history = LineHistory.new
 
         @eval_entry = TkEntry.new(toplevel) {
           font 'Courier'
@@ -124,7 +125,18 @@ module Drx
           locate_method(current_object, @methodsbox.get_selection)
         }
         @eval_entry.bind('Key-Return') {
-          eval_code
+          code = @eval_entry.value.strip
+          if code != ''
+            eval_code code
+            @eval_history.add code
+            @eval_entry.value = ''
+          end
+        }
+        @eval_entry.bind('Key-Up') {
+          @eval_entry.value = @eval_history.prev!
+        }
+        @eval_entry.bind('Key-Down') {
+          @eval_entry.value = @eval_history.next!
         }
 
         output "Please visit the homepage, http://drx.rubyforge.org/, for usage instructions.\n", 'info'
@@ -208,8 +220,7 @@ module Drx
         ObjInfo.new(current_object).__get_ivar(@varsbox.get_selection)
       end
 
-      def eval_code
-        code = @eval_entry.get.strip
+      def eval_code(code)
         see = !!code.sub!(/^see\s/, '')
         begin
           result = current_object.instance_eval(code)
@@ -297,6 +308,33 @@ module Drx
         # @todo Skip this if Tk is already running.
         Tk.mainloop
         Tk.restart # So that Tk doesn't complain 'can't invoke "frame" command: application has been destroyed' next time.
+      end
+    end
+
+    # Manages history for an input line.
+    class LineHistory
+      def initialize
+        @entries = []
+        @pos = 0
+      end
+      def past_end?
+        @pos >= @entries.size
+      end
+      def add(s)
+        @entries.reject! { |ent| ent == s }
+        @entries << s
+        @pos = @entries.size
+      end
+      def prev!
+        @pos -= 1 if @pos > 0
+        current
+      end
+      def next!
+        @pos += 1 if not past_end?
+        current
+      end
+      def current
+        past_end? ? '' : @entries[@pos]
       end
     end
 

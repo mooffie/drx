@@ -75,8 +75,8 @@ module Drx
         @eval_entry.bind('Key-Return') {
           code = @eval_entry.value.strip
           if code != ''
+            @eval_history.add code.dup
             eval_code code
-            @eval_history.add code
             @eval_entry.value = ''
           end
         }

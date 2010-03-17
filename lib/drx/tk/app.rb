@@ -86,6 +86,17 @@ module Drx
         @eval_entry.bind('Key-Down') {
           @eval_entry.value = @eval_history.next!
         }
+        toplevel.bind('Control-l') {
+          @eval_entry.focus
+        }
+        toplevel.bind('Control-r') {
+          # Refresh the display. Useful if you eval'ed some code that changes the
+          # object inspected.
+          navigate_to tip
+          # Note: it seems that #instance_eval creates a singleton for the object.
+          # So after eval'ing something and pressing C-r, you're going to see this
+          # extra class.
+        }
 
         output "Please visit the homepage, http://drx.rubyforge.org/, for usage instructions.\n", 'info'
       end
@@ -228,7 +239,7 @@ module Drx
         files.unlink if files
       end
 
-      # Makes `obj` the primary object seen (the one who is the root of the diagram).
+      # Makes `obj` the primary object seen (the one which is the tip of the diagram).
       def navigate_to(obj)
         @current_object = obj
         @stack << obj
@@ -238,6 +249,12 @@ module Drx
         @im.active_url = @im.urls.first
       end
       alias see navigate_to
+
+      # Returns the tip object in the diagram (the one passed to navigate_to())
+      def tip
+        #@objs[@im.urls.first].the_object
+        @stack.last
+      end
 
       # Make `obj` the selected object. That is, the one the variable and method boxes reflect.
       def select_object(obj)

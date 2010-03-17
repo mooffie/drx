@@ -112,7 +112,7 @@ module Drx
         main_frame.add VBox.new toplevel, [
           [Scrolled.new(toplevel, @eval_result, :vertical => true), { :expand => true, :fill => 'both' } ],
           TkLabel.new(toplevel, :anchor => 'w') {
-            text 'Type some code to eval in the context of the selected object; prepend with "see" to examine it.'
+            text 'Type some code to eval; \'self\' is the object at tip of diagram; prepend with "see" to examine result.'
           },
           @eval_entry,
         ]
@@ -182,7 +182,7 @@ module Drx
       def eval_code(code)
         see = !!code.sub!(/^see\s/, '')
         begin
-          result = current_object.instance_eval(code)
+          result = tip.instance_eval(code)
           output result.inspect + "\n"
         rescue StandardError, ScriptError => ex
           gist = "%s: %s" % [ex.class, ex.message]

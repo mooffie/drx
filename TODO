@@ -3,8 +3,6 @@
 
 * The 'Colored' module: we can't open in editor most of its methods.
 
-* eval() in the context of the "tip" object, not the selected one.
-
 * Clicking an empty listbox results in error.
 
 * get_diagram(): would be cleaner if it gets the 'files' as an argument. Tempfiles' constructor should get a block and clean after itself.

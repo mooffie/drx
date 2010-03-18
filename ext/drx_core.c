@@ -140,13 +140,16 @@ static t_do_locate_method(NODE *ND_method) {
   //
   // The NODE_SCOPE node
   //
-  
+
   ND_scope = ND_method->u2.node;
+  if (!ND_scope) {
+     return RSTR("That's an undef'ed method");
+  }
 
   if (nd_type(ND_scope) == NODE_CFUNC/*2*/) {
     return RSTR("That's a C function");
   }
-  
+
   if (nd_type(ND_scope) == NODE_ATTRSET/*89*/) {
     return RSTR("That's an attr setter");
   }
@@ -171,7 +174,7 @@ static t_do_locate_method(NODE *ND_method) {
   
   ND_block = ND_scope->u3.node;
 
-  if (nd_type(ND_block) != NODE_BLOCK/*4*/) {
+  if (!ND_block || nd_type(ND_block) != NODE_BLOCK/*4*/) {
     return RSTR("I'm expecting a NODE_BLOCK here...");
   }
   
@@ -184,12 +187,12 @@ static t_do_locate_method(NODE *ND_method) {
 
 /*
  *  call-seq:
- *     Drx.locate_method(Date, "to_s")  => str
+ *     Drx::Core::locate_method(Date, "to_s")  => str
  *  
  *  Locates the filename and line-number where a method was defined. Returns a
  *  string of the form "89:/path/to/file.rb", or nil if method doens't exist.
  *  If the method exist but isn't a Ruby method (i.e., if it's written in C),
- *  the string returned will include an erorr message, e.g. "That's a C
+ *  the string returned will include an error message, e.g. "That's a C
  *  function".
  */
 static VALUE t_locate_method(VALUE self, VALUE obj, VALUE method_name)

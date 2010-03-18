@@ -58,19 +58,27 @@ module Drx
         layout
 
         @varsbox.bind('<ListboxSelect>') {
-          require 'pp'
-          output "\n== Variable #{@varsbox.get_selection}\n\n", 'info'
-          output PP.pp(selected_var, '')
+          if @varsbox.has_selection?
+            require 'pp'
+            output "\n== Variable #{@varsbox.get_selection}\n\n", 'info'
+            output PP.pp(selected_var, '')
+          end
         }
         @varsbox.bind('ButtonRelease-3') {
-          output "\n== Variable #{@varsbox.get_selection}\n\n", 'info'
-          output selected_var.inspect + "\n"
+          if @varsbox.has_selection?
+            output "\n== Variable #{@varsbox.get_selection}\n\n", 'info'
+            output selected_var.inspect + "\n"
+          end
         }
         @varsbox.bind('Double-Button-1') {
-          see selected_var
+          if @varsbox.has_selection?
+            see selected_var
+          end
         }
         @methodsbox.bind('Double-Button-1') {
-          locate_method(current_object, @methodsbox.get_selection)
+          if @methodsbox.has_selection?
+            locate_method(current_object, @methodsbox.get_selection)
+          end
         }
         @eval_entry.bind('Key-Return') {
           code = @eval_entry.value.strip
@@ -348,11 +356,10 @@ module Drx
 
     class ::TkListbox
       def get_selection
-        idx = curselection[0]
-        return get(idx)
+        return get(curselection[0])
       end
-      def get_index
-        curselection[0]
+      def has_selection?
+        not curselection.empty?
       end
     end
 

@@ -9,9 +9,6 @@
 
 * Make sure the C extension compiles in C++ mode. And get rid of that warning.
 
-* Cleanups:
-  - '@stack' not descriptive
-
 == Bugs
 
 Nothing noteworthy, I think.

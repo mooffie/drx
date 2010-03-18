@@ -15,7 +15,7 @@ module Drx
       end
 
       def initialize
-        @stack = []
+        @navigation_history = []
         @eval_history = LineHistory.new
 
         @eval_entry = TkEntry.new(toplevel) {
@@ -45,7 +45,7 @@ module Drx
           navigate_to_selected
         }
         @im.bind('ButtonRelease-3') {
-          back
+          navigate_back
         }
 
         @varsbox = TkListbox.new(toplevel) {
@@ -176,10 +176,10 @@ module Drx
         end
       end
 
-      def back
-        if @stack.size > 1
-          @stack.pop
-          see @stack.pop
+      def navigate_back
+        if @navigation_history.size > 1
+          @navigation_history.pop
+          see @navigation_history.pop
         end
       end
 
@@ -251,7 +251,7 @@ module Drx
       # Makes `obj` the primary object seen (the one which is the tip of the diagram).
       def navigate_to(obj)
         @current_object = obj
-        @stack << obj
+        @navigation_history << obj
         display_graph(obj)
         # Trigger the update of the variables and methods tables by selecting this object
         # in the imagemap.
@@ -261,8 +261,7 @@ module Drx
 
       # Returns the tip object in the diagram (the one passed to navigate_to())
       def tip
-        #@objs[@im.urls.first].the_object
-        @stack.last
+        @navigation_history.last
       end
 
       # Make `obj` the selected object. That is, the one the variable and method boxes reflect.

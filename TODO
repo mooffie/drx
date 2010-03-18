@@ -3,7 +3,7 @@
 
 * The 'Colored' module: we can't open in editor most of its methods.
 
-* Switching back to the app from the editor unselects the object: because CTRL is pressed...
+* Double clicking Float.new crashes ruby.
 
 * 'drxtk.rb' emits warnings with '-w'. That probably isn't my fault.
 

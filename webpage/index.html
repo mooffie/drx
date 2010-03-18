@@ -3,48 +3,73 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Dr. X -- The Good Doctor</title>
+<style type="text/css">
+.gist {
+  background: #ccffcc;
+}
+em {
+  font-weight: bold;
+}
+</style>
+<title>DrX -- The Good Doctor</title>
 <link rel="stylesheet" href="index.css" type="text/css">
 </head>
 
-<h1>Dr. X</h1>
+<h1>DrX</h1>
 
 <a href="screenshot1.png"><img align="right" width="400" height="410" class="main"
-  src="screenshot1.png" title="Screenshot showing Dr. X in action" /></a>
+  src="screenshot1.png" title="Screenshot showing DrX in action" /></a>
 
-<p>"Dr. X", the good doctor, is a small <em>object inspector</em> with
-some unique features. It's most suitable for programmers who wish to
-understand Ruby's object model better. Key features:</p>
+<p>DrX, the good doctor, is a small <em>object inspector</em> for Ruby.
+
+<p>Instead of focusing on the <em>contents</em> of your object, DrX
+instead focuses on its <em>object model</em>. As a result, DrX
+is most suitable for programmers wishing to understand Ruby's object
+model better. It's especially adept at showing you how a "magical"
+library works (e.g. ActiveRecord).</p>
+
+<h2>Key features:</h2>
 
 <ul>
-<li>Exposes everything about a Ruby object: its 'klass', 'super',
+<li>See everything about a Ruby object: its 'klass', 'super',
 'iv_tbl', 'm_tbl'. See your singletons with your very own eyes! <br />&nbsp;</li>
-<li>Double-clicking on a method name launches an editor
-and positions the cursor at the exact line in the file where the method is
-defined. (Locating methods isn't done by parsing your source code but by
-examining the Ruby interpreter internal nodes.)</li>
-</ul>
 
-<p class="error">
-2009-02-03 I've released this software only today; Consider it alpha quality.
-</p>
+<li>Double-click a method to launch an editor
+and position the cursor on the exact line where the method is
+defined!</li>
+</ul>
 
 <h2>Installation</h2>
 
-<p>Dr. X is shipped as a gem. At your system prompt type:</p>
+<p>DrX is shipped as a gem. At your system prompt type:</p>
 
 <code>gem install drx</code>
 
 <h2>Usage</h2>
 
 <p>Just <code>require 'drx'</code> in your program and do
-<code>some_object.see</code> to investigate that object.</p>
+<code>some_object.see</code> to investigate that object:</p>
+
+<pre>
+require 'rubygems'
+require 'drx'
+
+"wizard of oz".see
+
+Math::PI.see
+
+s = "wizard of oz"
+def s.strong
+  "&lt;strong&gt;" + self + "!&lt;/strong&gt;"
+end
+s.see
+</pre>
 
 <h2>Requirements</h2>
 
 <ul>
 <li>MRI Ruby 1.8 (Code wasn't yet ported to Ruby 1.9).</li>
-<li>Ability to compile Ruby C extenstions (Because Dr. X has some part written in C).</li>
+<li>Ability to compile Ruby C extenstions (Because DrX has some part written in C).</li>
 <li>The Tk user interface toolkit.</li>
 <li>The <a href="todo-update-this-link">graphviz</a> package installed (It's used to draw the diagrams).</li>
 </ul>
@@ -64,17 +89,17 @@ require 'dm-core'
 
 class Post
   include DataMapper::Resource
- 
+
   property :post_id,  Serial
   property :title,    String
   property :body,     Text
-  
+
   belongs_to :user
 end
 
 class User
   include DataMapper::Resource
- 
+
   property :user_uid,  Serial
   property :name,      String
   property :mail,      String
@@ -119,18 +144,18 @@ we want to see if it has any <code>#included</code>. So lets examine its
 singleton class. Click the "#&lt;Class:DataMapper::Resource&gt; 'S" line.</p>
 
 <p>Indeed, we see an 'included' method (in the right-most pane). Let's
-double click this method to bring up an editor. Dr. X is so smart that it
+double click this method to bring up an editor. DrX is so smart that it
 knows in which file and at what line a method is defined. Here's the
 result (click to enlarge):</p>
 
 <div align=center>
   <a href="screenshot2.png"><img width="530" height="380"
-    src="screenshot2.png" title="Screenshot showing Dr. X in action" /></a>
+    src="screenshot2.png" title="Screenshot showing DrX in action" /></a>
 </div>
 
 <p>Yep, that <code>model.extend Model</code> line explains everything. The mystery was solved!</p>
 
-<h2>Understanding Dr. X</h2>
+<h2>Understanding DrX</h2>
 
 <p>If you aren't familiar with how objects are represented internally in
 Ruby, you may not feel comfortable with the left-most pane, the one that
@@ -158,7 +183,7 @@ struct RClass {
 };
 </pre>
 
-<p>What Dr. X does is show you these four slots: the 'klass', the 'super',
+<p>What DrX does is show you these four slots: the 'klass', the 'super',
 the 'iv_tbl', and the 'm_tbl'.</p>
 
 <h2>Key bindings</h2>
@@ -168,9 +193,10 @@ the 'iv_tbl', and the 'm_tbl'.</p>
 <dt>The hierarchy pane</dt>
 <dd>
   <ul>
-  <li>Left-click on an object in the diagram to select this object. This updates the variables and methods panes to reflect this object.</li>
-  <li>Right-click to move back in history.</li>
-  <li>Double Left-click on an object in the diagram to make this object the tip of the diagram. This
+  <li><span class="gist">Left-click</span> an object in the diagram to <span class="gist">select</span> this object. This updates the variables and methods panes to reflect this object.
+      <ul><li>Alternatively, you can select objects by pressing <span class="gist">Control while moving</span> the mouse. This is useful for quickly skimming through the objects without straining your hands.</li></ul></li>
+  <li><span class="gist">Right-click</span> to move <span class="gist">back</span> in history.</li>
+  <li><span class="gist">Double Left-click</span> an object in the diagram to make this object the <span class="gist">tip</span> of the diagram. This
       is only needed if want to see the 'klass' of an included module (in
       other words, if you want to see "the singleton of a module"), because
       this singleton is the 'klass' of an 'ICLS (anonymous class) and the UI
@@ -182,24 +208,24 @@ the 'iv_tbl', and the 'm_tbl'.</p>
 <dt>The variables pane</dt>
 <dd>
   <ul>
-  <li>Double left-click on a variable to "see" it.</li>
-  <li>Left-click on a variable to p() it.</li>
-  <li>Right-click on a variable to pp() it.</li>
+  <li><span class="gist">Double left-click</span> a variable to "<span class="gist">see</span>" it.</li>
+  <li><span class="gist">Left-click</span> a variable to <span class="gist">p()</span> it.</li>
+  <li><span class="gist">Right-click</span> a variable to <span class="gist">pp()</span> it.</li>
   </ul>
 </dd>
 
 <dt>The methods pane</dt>
 <dd>
   <ul>
-  <li>Double-click on a method to bring up an editor showing it.</li>
+  <li><span class="gist">Double-click</span> a method to bring up an <span class="gist">editor</span> showing it.</li>
   </ul>
 </dd>
 
 <dt>Anywhere</dt>
 <dd>
   <ul>
-  <li>Control-R refreshes the display. Useful if you eval'ed some code that changes the object inspected.</li>
-  <li>Control-L moves the keyboard focus to the eval input line.</li>
+  <li><span class="gist">Control-R</span> <span class="gist">refreshes</span> the display. Useful if you eval'ed some code that changes the object inspected.</li>
+  <li><span class="gist">Control-L</span> moves the keyboard focus to the eval <span class="gist">input</span> line.</li>
   </ul>
 </dd>
 
@@ -207,16 +233,10 @@ the 'iv_tbl', and the 'm_tbl'.</p>
 
 <h2>Launching an editor</h2>
 
-<p>When you double-click a method, Dr. X launches a 'gedit +%d "%s"'
+<p>When you double-click a method, DrX launches a 'gedit +%d "%s"'
 command by default (%d and %s are substituted by the line-number and
 file-name). If you wish to use some other editor, set your
 'DRX_EDITOR_COMMAND' environment variable accordingly.</p>
-
-<p>If Dr. X fails to load your editor, inspect its STDOUT. Error
-messages are written there.</p>
-
-<p>You should pay attention to STDOUT anyway because it's where p()'s
-and pp()'s output goes when you click on variables.</p> 
 
 <h2>Reporting bugs</h2>
 

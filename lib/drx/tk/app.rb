@@ -1,5 +1,5 @@
 require 'tk'
-#Tk.default_widget_set = :Ttk
+Tk.default_widget_set = :Ttk
 require 'drx/tk/imagemap'
 
 module Drx
@@ -51,8 +51,13 @@ module Drx
         @varsbox = TkListbox.new(toplevel) {
           width 25
         }
-        @methodsbox = TkListbox.new(toplevel) {
-          width 35
+        @methodsbox = Tk::Tile::Treeview.new(toplevel) {
+          columns 'name location'
+          heading_configure('name', :text => 'Name')
+          heading_configure('location', :text => 'Location')
+          column_configure('name', :stretch => false )
+          column_configure('location', :stretch => false )
+          show 'headings'
         }
 
         layout
@@ -227,11 +232,13 @@ module Drx
 
       # Fills the methods listbox with a list of the object's methods.
       def display_methods(obj)
-        @methodsbox.delete('0', 'end')
+        @methodsbox.clear
         info = ObjInfo.new(obj)
         if obj and info.class_like?
           methods = info.m_tbl.keys.map do |v| v.to_s end.sort
-          @methodsbox.insert('end', *methods)
+          methods.each do |name|
+            @methodsbox.insert('', 'end', :text => name, :values => [ name, File.basename(String(info.locate_method(name))) ] )
+          end
         end
       end
 
@@ -359,6 +366,18 @@ module Drx
       end
       def has_selection?
         not curselection.empty?
+      end
+    end
+
+    class ::Tk::Tile::Treeview
+      def get_selection
+        selection[0].text
+      end
+      def has_selection?
+        not selection.empty?
+      end
+      def clear
+        children('').each { |i| delete i }
       end
     end
 

@@ -107,15 +107,17 @@ module Drx
       return out
     end
 
-    # Get a diagram of the inheritance hierarchy.
+    # Generates a diagram of the inheritance hierarchy. It accepts a hash
+    # pointing to pathnames to write the result to. A Tempfiles hash
+    # can be used instead.
     #
     #   the_object = "some object"
-    #   files = ObjInfo.new(the_object).get_diagram
-    #   system('xview ' + files['gif'])
+    #   Tempfiles.new do |files|
+    #     ObjInfo.new(the_object).generate_diagram
+    #     system('xview ' + files['gif'])
+    #   end
     #
-    def get_diagram(&block)
-      require 'drx/tempfiles'
-      files = Tempfiles.new('drx')
+    def generate_diagram(files, &block)
       source = self.dot_source(&block)
       File.open(files['dot'], 'w') { |f| f.write(source) }
 
@@ -139,8 +141,6 @@ And the response I got is this:
         EOS
         raise error
       end
-
-      return files
     end
 
   end

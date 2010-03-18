@@ -8,13 +8,25 @@ require 'tempfile'
 #
 class Tempfiles
 
-  def initialize(basename)
+  def initialize(basename=nil)
+    if basename.nil?
+      basename = $0.tr('^a-z', '_').tr('_', '') + 'xyzzy'
+    end
+
     @refs = []
     @paths = Hash.new do |h, suffix|
       tf = Tempfile.new([basename, '.' + suffix])
       tf.close
       @refs << tf  # We must keep a ref to this object or its finalizer will delete the temp file.
       h[suffix] = tf.path
+    end
+
+    if block_given?
+      begin
+        yield self
+      ensure
+        unlink
+      end
     end
   end
 

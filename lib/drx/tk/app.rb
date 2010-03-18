@@ -229,14 +229,15 @@ module Drx
 
       # Loads the imagemap widget with a diagram of the object.
       def display_graph(obj)
+        require 'drx/tempfiles'
         @objs = {}
-        files = ObjInfo.new(obj).get_diagram do |info|
-          @objs[info.dot_url] = info
+        Tempfiles.new do |files|
+          ObjInfo.new(obj).generate_diagram(files) do |info|
+            @objs[info.dot_url] = info
+          end
+          @im.image = files['gif']
+          @im.image_map = files['map']
         end
-        @im.image = files['gif']
-        @im.image_map = files['map']
-      ensure
-        files.unlink if files
       end
 
       # Makes `obj` the primary object seen (the one which is the tip of the diagram).

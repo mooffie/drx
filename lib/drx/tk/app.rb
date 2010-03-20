@@ -48,8 +48,13 @@ module Drx
           navigate_back
         }
 
-        @varsbox = TkListbox.new(toplevel) {
-          width 25
+        @varsbox = Tk::Tile::Treeview.new(toplevel) {
+          columns 'name value'
+          heading_configure('name', :text => 'Name')
+          heading_configure('value', :text => 'Value')
+          column_configure('name', :stretch => false )
+          column_configure('value', :stretch => false )
+          show 'headings'
         }
         @methodsbox = Tk::Tile::Treeview.new(toplevel) {
           columns 'name location'
@@ -62,7 +67,7 @@ module Drx
 
         layout
 
-        @varsbox.bind('<ListboxSelect>') {
+        @varsbox.bind('<TreeviewSelect>') {
           if @varsbox.has_selection?
             require 'pp'
             output "\n== Variable #{@varsbox.get_selection}\n\n", 'info'
@@ -220,13 +225,23 @@ module Drx
 
       # Fills the variables listbox with a list of the object's instance variables.
       def display_variables(obj)
-        @varsbox.delete('0', 'end')
+        allowed_names = [/^@/, /^[A-Z]/, '__classpath__', '__tmp_classpath__', '__classid__', '__attached__']
+        @varsbox.clear
         info = ObjInfo.new(obj)
         if obj and info.has_iv_tbl?
           vars = info.iv_tbl.keys.map do |v| v.to_s end.sort
           # Get rid of gazillions of Tk classes:
           vars = vars.reject { |v| v =~ /Tk|Ttk/ }
-          @varsbox.insert('end', *vars)
+          vars.each do |name|
+            value = if allowed_names.any? { |p| p === name }
+                      info.__get_ivar(name).inspect
+                    else
+                      # We don't want to inspect ruby's internal slots (because
+                      # they may not be Ruby values at all).
+                      ''
+                    end
+            @varsbox.insert('', 'end', :text => name, :values => [ name, value ] )
+          end
         end
       end
 
@@ -357,15 +372,6 @@ module Drx
           w.raise
           w.pack(layout)
         }
-      end
-    end
-
-    class ::TkListbox
-      def get_selection
-        return get(curselection[0])
-      end
-      def has_selection?
-        not curselection.empty?
       end
     end
 

@@ -119,6 +119,8 @@ module Drx
         output "Please visit the homepage, http://drx.rubyforge.org/, for usage instructions.\n", 'info'
       end
 
+      def vbox(*args); VBox.new(toplevel, args); end
+
       # Arrange the main widgets inside layout widgets.
       def layout
         main_frame = TkPanedwindow.new(toplevel, :orient => :vertical) {
@@ -127,29 +129,30 @@ module Drx
           # We don't want them to obscure the main ones.
           lower
         }
-        main_frame.add VBox.new toplevel, [
+        main_frame.add vbox(
           [Scrolled.new(toplevel, @eval_result, :vertical => true), { :expand => true, :fill => 'both' } ],
           TkLabel.new(toplevel, :anchor => 'w') {
             text 'Type some code to eval; \'self\' is the object at tip of diagram; prepend with "see" to examine result.'
           },
-          @eval_entry,
-        ]
+          @eval_entry
+        )
 
         panes = TkPanedwindow.new(main_frame, :orient => :horizontal) {
           lower
         }
-        panes.add VBox.new toplevel, [
+        # Note the :weight's on the followings.
+        panes.add vbox(
           TkLabel.new(toplevel, :text => 'Object graph (klass and super):', :anchor => 'w'),
-          [@im, { :expand => true, :fill => 'both' } ],
-        ]
-        panes.add VBox.new toplevel, [
+          [@im, { :expand => true, :fill => 'both' } ]
+        ), :weight => 10
+        panes.add vbox(
           TkLabel.new(toplevel, :text => 'Variables (iv_tbl):', :anchor => 'w'),
           [Scrolled.new(toplevel, @varsbox), { :expand => true, :fill => 'both' } ]
-        ]
-        panes.add VBox.new toplevel, [
+        ), :weight => 50
+        panes.add vbox(
           TkLabel.new(toplevel, :text => 'Methods (m_tbl):', :anchor => 'w'),
           [Scrolled.new(toplevel, @methodsbox), { :expand => true, :fill => 'both' } ]
-        ]
+        ), :weight => 10
 
         main_frame.add(panes)
       end

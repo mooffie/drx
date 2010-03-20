@@ -143,24 +143,24 @@ static t_do_locate_method(NODE *ND_method) {
 
   ND_scope = ND_method->u2.node;
   if (!ND_scope) {
-     return RSTR("That's an undef'ed method");
+     return RSTR("<undef>");
   }
 
   if (nd_type(ND_scope) == NODE_CFUNC/*2*/) {
-    return RSTR("That's a C function");
+    return RSTR("<c>");
   }
 
   if (nd_type(ND_scope) == NODE_ATTRSET/*89*/) {
-    return RSTR("That's an attr setter");
+    return RSTR("<attr setter>");
   }
 
   if (nd_type(ND_scope) == NODE_FBODY/*1*/) {
-    return RSTR("That's an alias");
+    return RSTR("<alias>");
   }
   
   if (nd_type(ND_scope) == NODE_ZSUPER/*41*/) {
     // @todo The DateTime clas has a lot of these.
-    return RSTR("That's a ZSUPER, whatver the heck it means!");
+    return RSTR("<That's a ZSUPER, whatver the heck it means!>");
   }
 
   if (nd_type(ND_scope) != NODE_SCOPE/*3*/) {

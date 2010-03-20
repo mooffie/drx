@@ -5,8 +5,6 @@
 
 * 'drxtk.rb' emits warnings with '-w'. That probably isn't my fault.
 
-* Make sure the C extension compiles in C++ mode. And get rid of that warning.
-
 == Bugs
 
 Nothing noteworthy, I think.

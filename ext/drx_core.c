@@ -30,7 +30,7 @@ static VALUE t_get_iv_tbl(VALUE self, VALUE obj)
   if (TYPE(obj) != T_OBJECT && TYPE(obj) != T_CLASS && TYPE(obj) != T_ICLASS && TYPE(obj) != T_MODULE) {
     rb_raise(rb_eTypeError, "Only T_OBJECT/T_CLASS/T_MODULE is expected as the argument (got %d)", TYPE(obj));
   }
-  
+
   if (ROBJECT(obj)->iv_tbl) {
     st_foreach(ROBJECT(obj)->iv_tbl, record_var, (st_data_t)hash);
   }
@@ -124,76 +124,88 @@ static VALUE t_get_address(VALUE self, VALUE obj)
 
 #define RSTR(s) rb_str_new2(s)
 
-static t_do_locate_method(NODE *ND_method) {
+static VALUE t_do_locate_method(NODE *ND_method) {
   NODE *ND_scope = NULL, *ND_block = NULL;
   VALUE place;
   char line_s[20];
-  
+
   //
   // The NODE_METHOD node
   //
 
   if (nd_type(ND_method) != NODE_METHOD/*0*/) {
-    return RSTR("I'm expecting a NODE_METHOD here...");
+    return RSTR("<I'm expecting a NODE_METHOD here...>");
   }
-  
+
   //
   // The NODE_SCOPE node
   //
 
   ND_scope = ND_method->u2.node;
   if (!ND_scope) {
+     // When we use undef() to undefine a method.
      return RSTR("<undef>");
+  }
+
+  if (nd_type(ND_scope) == NODE_FBODY/*1*/) {
+    return RSTR("<alias>");
   }
 
   if (nd_type(ND_scope) == NODE_CFUNC/*2*/) {
     return RSTR("<c>");
   }
 
+  if (nd_type(ND_scope) == NODE_IVAR/*50*/) {
+    return RSTR("<attr reader>");
+  }
+
   if (nd_type(ND_scope) == NODE_ATTRSET/*89*/) {
     return RSTR("<attr setter>");
   }
 
-  if (nd_type(ND_scope) == NODE_FBODY/*1*/) {
-    return RSTR("<alias>");
-  }
-  
   if (nd_type(ND_scope) == NODE_ZSUPER/*41*/) {
-    // @todo The DateTime clas has a lot of these.
-    return RSTR("<That's a ZSUPER, whatver the heck it means!>");
+    // When we change visibility (using 'private :method' or 'public :method') of
+    // a base method, this node is created.
+    return RSTR("<zsuper>");
+  }
+
+  if (nd_type(ND_scope) == NODE_BMETHOD/*99*/) {
+    // This is created by define_method().
+    return RSTR("<bmethod>");
   }
 
   if (nd_type(ND_scope) != NODE_SCOPE/*3*/) {
     printf("I'm expecting a NODE_SCOPE HERE (got %d instead)\n", nd_type(ND_scope));
-    return RSTR("I'm expecting a NODE_SCOPE HERE...");
+    return RSTR("<I'm expecting a NODE_SCOPE HERE...>");
   }
-  
+
   //
   // The NODE_BLOCK node
   //
-  
+
   ND_block = ND_scope->u3.node;
 
   if (!ND_block || nd_type(ND_block) != NODE_BLOCK/*4*/) {
-    return RSTR("I'm expecting a NODE_BLOCK here...");
+    return RSTR("<I'm expecting a NODE_BLOCK here...>");
   }
-  
+
   sprintf(line_s, "%d:", nd_line(ND_block));
   place = RSTR(line_s);
   rb_str_cat2(place, ND_block->nd_file);
-  
+
   return place;
 }
 
 /*
  *  call-seq:
  *     Drx::Core::locate_method(Date, "to_s")  => str
- *  
+ *
  *  Locates the filename and line-number where a method was defined. Returns a
- *  string of the form "89:/path/to/file.rb", or nil if method doens't exist.
- *  If the method exist but isn't a Ruby method (i.e., if it's written in C),
- *  the string returned will include an error message, e.g. "That's a C
- *  function".
+ *  string of the form "89:/path/to/file.rb", or nil if the method doesn't exist,
+ *  or a string of the form "<identifier>".
+ *
+ *  If the method exists but isn't a Ruby method (e.g., if it's written in C),
+ *  an <identifier> string is returned. E.g., <c>, <alias>, <attr reader>.
  */
 static VALUE t_locate_method(VALUE self, VALUE obj, VALUE method_name)
 {
@@ -208,7 +220,7 @@ static VALUE t_locate_method(VALUE self, VALUE obj, VALUE method_name)
   }
   c_name = StringValuePtr(method_name);
   ID id = rb_intern(c_name);
-  if (st_lookup(RCLASS(obj)->m_tbl, id, &method_node))  {
+  if (st_lookup(RCLASS(obj)->m_tbl, id, (st_data_t *)&method_node))  {
     return t_do_locate_method(method_node);
   } else {
     return Qnil;

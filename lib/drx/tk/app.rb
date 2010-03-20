@@ -236,7 +236,7 @@ module Drx
           # Get rid of gazillions of Tk classes:
           vars = vars.reject { |v| v =~ /Tk|Ttk/ }
           vars.each do |name|
-            value = if allowed_names.any? { |p| p === name }
+            value = if allowed_names.any? { |p| p === name } and name != 'Kconv' # For some reason, Kconv crashes on us when in irb.
                       info.__get_ivar(name).inspect
                     else
                       # We don't want to inspect ruby's internal slots (because

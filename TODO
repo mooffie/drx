@@ -1,10 +1,9 @@
 
-== Misc
-
-* The 'Colored' module: we can't open in editor most of its methods.
+== GUI
 
 * 'drxtk.rb' emits warnings with '-w'. That probably isn't my fault.
 
-== Bugs
+== The C extension
 
-Nothing noteworthy, I think.
+* We should try to locate methods defined by define_method() (NODE_BMETHOD).
+  E.g., used in the 'Colored' gem and in Sinatra::Base.

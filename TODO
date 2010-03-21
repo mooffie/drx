@@ -5,4 +5,4 @@
 
 == The C extension
 
---empy--
+* "require 'extlib'; Extlib.see" crashes.

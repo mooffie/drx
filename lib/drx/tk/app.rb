@@ -33,15 +33,12 @@ module Drx
         @im = TkImageMap::ImageMap.new(toplevel)
         @im.select_command { |url|
           if url
-            puts 'clicked: ' + @objs[url].repr
             select_object @objs[url].the_object
           else
-            puts 'cleared'
             select_object nil
           end
         }
         @im.double_select_command { |url|
-          puts 'going to ' + url
           navigate_to_selected
         }
         @im.bind('ButtonRelease-3') {
@@ -167,7 +164,7 @@ module Drx
 
       def open_up_editor(filename, lineno)
         command = sprintf(ENV['DRX_EDITOR_COMMAND'] || EDITOR_COMMAND, lineno, filename)
-        output "Execting: #{command}...\n", 'info'
+        output "Executing: #{command}...\n", 'info'
         if !fork
           if !Kernel.system(command)
             output "Could not execute the command '#{command}'\n", 'error'
@@ -184,7 +181,7 @@ module Drx
           if place =~ /\A(\d+):(.*)/
             open_up_editor($2, $1)
           else
-            output "Can't locate method, because: #{place}\n", 'info'
+            output "Can't locate method, because it's a: #{place}\n", 'info'
           end
         end
       end

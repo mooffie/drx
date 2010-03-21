@@ -2,7 +2,7 @@ require 'rubygems'
 
 spec = Gem::Specification.new do |s|
   s.name          = 'drx'
-  s.version       = '0.0.2'
+  s.version       = '0.4.0'
   s.author        = 'Mooffie'
   s.email         = 'mooffie@gmail.com'
   s.platform      = Gem::Platform::RUBY
@@ -10,11 +10,11 @@ spec = Gem::Specification.new do |s|
   s.homepage      = 'http://drx.rubyforge.org/'
   s.summary       = "Inspect Ruby objects."
   s.required_ruby_version = '~> 1.8'
-  
-  candidates = ['README'] + Dir.glob("{bin,docs,lib,ext,tests}/**/*")
+
+  candidates = ['README'] + Dir.glob("{bin,docs,lib,ext,tests,examples}/**/*")
   s.files = candidates.delete_if { |f| f =~ /(~|Makefile|\.o|\.so)$/ }
   #p s.files
-  
+
   s.require_path  = 'lib' 
   s.extensions = ["ext/extconf.rb"]
 end

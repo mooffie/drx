@@ -3,3 +3,5 @@ doc
 *.o
 *.so
 Makefile
+_resources
+*.gem

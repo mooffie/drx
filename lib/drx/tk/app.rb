@@ -33,15 +33,12 @@ module Drx
         @im = TkImageMap::ImageMap.new(toplevel)
         @im.select_command { |url|
           if url
-            puts 'clicked: ' + @objs[url].repr
             select_object @objs[url].the_object
           else
-            puts 'cleared'
             select_object nil
           end
         }
         @im.double_select_command { |url|
-          puts 'going to ' + url
           navigate_to_selected
         }
         @im.bind('ButtonRelease-3') {

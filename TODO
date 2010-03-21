@@ -5,5 +5,4 @@
 
 == The C extension
 
-* We should try to locate methods defined by define_method() (NODE_BMETHOD).
-  E.g., used in the 'Colored' gem and in Sinatra::Base.
+--empy--

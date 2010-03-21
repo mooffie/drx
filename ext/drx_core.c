@@ -171,7 +171,13 @@ static VALUE t_do_locate_method(NODE *ND_method) {
 
   if (nd_type(ND_scope) == NODE_BMETHOD/*99*/) {
     // This is created by define_method().
-    return RSTR("<bmethod>");
+    VALUE proc;
+    proc = (VALUE)ND_scope->u3.node;
+    // proc_to_s(), in eval.c, shows how to extract the location. However,
+    // for this we need access to the BLOCK structure. Unfortunately,
+    // that BLOCK is defined in eval.c, not in any .h file we can #include.
+    // So instead we resort to a dirty trick: we parse the output of Proc#to_s.
+    return rb_funcall(proc, rb_intern("_location"), 0, 0);
   }
 
   if (nd_type(ND_scope) != NODE_SCOPE/*3*/) {
@@ -249,4 +255,12 @@ void Init_drx_core() {
   rb_define_const(mCore, "T_CLASS", INT2FIX(T_CLASS));
   rb_define_const(mCore, "T_ICLASS", INT2FIX(T_ICLASS));
   rb_define_const(mCore, "T_MODULE", INT2FIX(T_MODULE));
+
+  // For the following, see explanation in t_do_locate_method().
+  rb_eval_string("\
+    class ::Proc;\
+      def _location;\
+        if to_s =~ /@(.*?):(\\d+)>$/ then \"#$2:#$1\" end;\
+      end;\
+    end");
 }

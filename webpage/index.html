@@ -10,6 +10,15 @@
 em {
   font-weight: bold;
 }
+.color-module {
+  background: #7fffd4; /* aquamarine */
+}
+.color-class {
+  background: #bfefff; /* lightblue1 */
+}
+.color-object {
+  background: #ffe7ba; /* wheat1 */
+}
 </style>
 <title>DrX -- The Good Doctor</title>
 <link rel="stylesheet" href="index.css" type="text/css">
@@ -65,6 +74,8 @@ end
 s.see
 </pre>
 
+<p>And see the <a href="#key-bindings">Key bindings</a> section at the bottom.</p>
+
 <h2>Requirements</h2>
 
 <ul>
@@ -73,6 +84,47 @@ s.see
 <li>The Tk user interface toolkit.</li>
 <li>The <a href="todo-update-this-link">graphviz</a> package installed (It's used to draw the diagrams).</li>
 </ul>
+
+<h2>The object graph</h2>
+
+<p>The object graph shows the object model. Ruby objects have two "pointers":</p>
+
+<ol>
+<li><em>klass</em>, which points to the class of an object.</li>
+<li><em>super</em>, which points to the parent of a class.</li>
+</ol>
+
+<p>Correspondingly, the object graph shows [at most] two arrows pointing
+out of an object: the <em>klass</em> arrow is shown as a dotted arrow,
+and is usually pointing to the right (horizontal); and the <em>super</em> arrow is
+shown as a solid arrow, and is usually pointing down (vertical).</p>
+
+<p>When you see a hoizontal arrow, think of it as "here are the methods
+my object responds to"; and when you see a vertical one, think "here are
+additional methods".</p>
+
+<h3>Colors and shapes</h2>
+
+<ul>
+<li class="color-module">Modules are shown in green</li>
+<li class="color-class">Classes are blue ovals. Singletons are blue eggs, and have "'S" appended to their label.</li>
+<li class="color-object">Mere objects are brownish houses.</li>
+</ul>
+
+<h2>The variables table</h2>
+
+<p>A Ruby object has a <em>variables table</em> associated with it. The
+variables pane lists the content of this table. It is customary to think
+of this table as holding instance <code>@variables</code> <code>@like</code>
+<code>@this</code>, but in fact Ruby stores here also constants
+("namespaces") and <code>@@class_variables</code>. The pane shows the raw
+contents of this table.</p>
+
+<h2>The methods table</h2>
+
+<p>A Ruby object, if it's a class or a module, also holds methods. These
+are stored in a <em>methods table</em>. The methods pane shows the contents of
+this table.</p>
 
 <h2>Example 1: Seeing things</h2>
 
@@ -113,21 +165,22 @@ post = Post.new
 
 require 'drx'
 post.see
+
+# Or just do Post.see
 </pre>
 
 <p>...and you'd get the window shown in the screenshot above (click to
-enlarge). Admittedly, it's ugly, but that's because I've used Tk. In the
-left pane you see the 'super' and 'klass' hierarchy. In the middle pane
-you see the instance variables and in the right-most one you see the
-methods.</p>
+enlarge).</p>
 
-<p>The screenshot happens to have the DataMapper::Model class selected.
-You can see the 'find_by_sql' and 'property' method on the right.</p>
+<p>In the graph you'll notice two distinct lines of hierarchy. One describes the
+Post class: most importanly it contains the
+<em>DataMapper::Resource</em> class. The other line describes the Post
+class' singleton: most importanly it contains the
+<em>DataMapper::Model</em> class. Take a minute to click these two
+classes and examine the methods they contain.</p>
 
-<p>The screenshot clearly shows two distinct branches. The lower one, in
-which DataMapper::Model appears, deals with the Post class singleton.
-The upper one, in which DataMapper::Resource appears, deals with the Post
-class itself.</p>
+<p>(The screenshot happens to have the DataMapper::Model class selected.
+You can see the 'find_by_sql' and 'property' method on the right. ::UPDATE::)</p>
 
 <h2>Example 2: Investigating things</h2>
 
@@ -138,31 +191,31 @@ Specifically, we want to know how DataMapper::Model got there. We
 suspect that DataMapper::Resource does this magic in its
 <code>#included</code>, and we want to verify this theory.</p>
 
-<p>Let's inspect DataMapper::Resource more closely. Double-click it.
-(That is, double-click the "{ include DataMapper::Resource }" line. Next,
-we want to see if it has any <code>#included</code>. So lets examine its
-singleton class. Click the "#&lt;Class:DataMapper::Resource&gt; 'S" line.</p>
+<p>Let's inspect DataMapper::Resource more closely. Double-click the
+"include DataMapper::Resource" box. In the new graph you'll see a
+<em>klass</em> arrow pointing right; it's pointing to the singleton of
+the module. (Why wasn't this shown in the previous graph? Because DrX
+doesn't show <em>klass</em>es of anonymous classes and of singletons, to
+prevent clutter). Click this singleton to inspect its methods:</p>
 
-<p>Indeed, we see an 'included' method (in the right-most pane). Let's
-double click this method to bring up an editor. DrX is so smart that it
-knows in which file and at what line a method is defined. Here's the
-result (click to enlarge):</p>
+<p>::SCR::</p>
+
+<p>Aha! We see that it indeed has an <code>included</code> method defined.
+Doule click it to open it up in an editor:</p>
 
 <div align=center>
   <a href="screenshot2.png"><img width="530" height="380"
     src="screenshot2.png" title="Screenshot showing DrX in action" /></a>
 </div>
 
-<p>Yep, that <code>model.extend Model</code> line explains everything. The mystery was solved!</p>
+<p>Yep, our suspicion was correct: the <em>Model</em> class is added to the
+singleton in <code>Resource.included</code>. The mystery was solved!</p>
+
+<p>(You can now navigate to <code>DataMapper::Model.extended</code> and see how the other classes are added.)</p>
 
 <h2>Understanding DrX</h2>
 
-<p>If you aren't familiar with how objects are represented internally in
-Ruby, you may not feel comfortable with the left-most pane, the one that
-shows a tree of 'super' and 'klass'.</p>
-
-<p>What do 'super' and 'klass' stand for? Ruby stores objects in a C
-struct. Here's its definition (from ruby.h):</p>
+<p>Here is how objects are defined internally in MRI ruby (from ruby.h):</p>
 
 <pre>
 struct RBasic {
@@ -186,7 +239,7 @@ struct RClass {
 <p>What DrX does is show you these four slots: the 'klass', the 'super',
 the 'iv_tbl', and the 'm_tbl'.</p>
 
-<h2>Key bindings</h2>
+<h2 id="key-bindings">Key bindings</h2>
 
 <dl>
 

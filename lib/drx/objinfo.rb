@@ -51,6 +51,11 @@ module Drx
 
     # @todo: this could be nicer. perhaps define an [] accessor.
     def __get_ivar(name)
+      if class_like? and name.to_s =~ /^[A-Z]/
+        # If it's a constant, it may be 'autoloaded'. We
+        # trigger the loading by calling const_get().
+        @obj.const_get(name)
+      end
       Core::get_ivar(@obj, name)
     end
 

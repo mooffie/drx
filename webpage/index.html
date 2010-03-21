@@ -190,17 +190,27 @@ the 'iv_tbl', and the 'm_tbl'.</p>
 
 <dl>
 
-<dt>The hierarchy pane</dt>
+<dt>The object graph pane</dt>
 <dd>
   <ul>
   <li><span class="gist">Left-click</span> an object in the diagram to <span class="gist">select</span> this object. This updates the variables and methods panes to reflect this object.
       <ul><li>Alternatively, you can select objects by pressing <span class="gist">Control while moving</span> the mouse. This is useful for quickly skimming through the objects without straining your hands.</li></ul></li>
   <li><span class="gist">Right-click</span> to move <span class="gist">back</span> in history.</li>
-  <li><span class="gist">Double Left-click</span> an object in the diagram to make this object the <span class="gist">tip</span> of the diagram. This
-      is only needed if want to see the 'klass' of an included module (in
+  <li><span class="gist">Double Left-click</span> an object in the diagram to make this object the <span class="gist">tip</span> of the diagram.
+      Why is this useful?
+      <ul>
+      <li>To set the 'self' for the eval line.</li>
+      <li>To see the 'klass' of an included module (in
       other words, if you want to see "the singleton of a module"), because
-      this singleton is the 'klass' of an 'ICLS (anonymous class) and the UI
+      this singleton is the 'klass' of an T_ICLASS (anonymous class) and the UI
       by default doesn't show it to prevent clutter.</li>
+      </ul>
+  </li>
+  <li><span class="gist">Scrolling</span> in the diagram is done by:
+      <ul>
+      <li>The mouse <span class="gist">wheel</span> (possibly together with <span class="gist">shift</span>).</li>
+      <li>Dragging with the <span class="gist">middle</span> mouse button.</li>
+      </ul>
   </li>
   </ul>
 </dd>
@@ -221,6 +231,21 @@ the 'iv_tbl', and the 'm_tbl'.</p>
   </ul>
 </dd>
 
+<dt>Between the panes</dt>
+<dd>
+  <ul>
+  <li><span class="gist">Click-drag</span> the bars between the panes to <span class="gist">resize</span> the panes.</li>
+  </ul>
+</dd>
+
+<dt>Eval input line</dt>
+<dd>
+  <ul>
+  <li><span class="gist">Enter</span> to <span class="gist">eval()</span> the code you've typed in the input line.</li>
+  <li><span class="gist">Arrow-up</span> and <span class="gist">Arrow-down</span> to move in the input line <span class="gist">history</span>.</li>
+  </ul>
+</dd>
+
 <dt>Anywhere</dt>
 <dd>
   <ul>
@@ -233,10 +258,16 @@ the 'iv_tbl', and the 'm_tbl'.</p>
 
 <h2>Launching an editor</h2>
 
-<p>When you double-click a method, DrX launches a 'gedit +%d "%s"'
-command by default (%d and %s are substituted by the line-number and
-file-name). If you wish to use some other editor, set your
+<p>When you double-click a method, DrX launches the command <code>gedit +%d "%s"</code>
+by default (%d and %s are substituted by the line-number
+and file-name). If you wish to use some other editor, set your
 'DRX_EDITOR_COMMAND' environment variable accordingly.</p>
+
+<p>DrX figures out a method's location by inspecting Ruby's internal
+nodes. This functionality is contained in a small C extension built when
+you install the DrX gem.</p>
+
+<p>Of course, DrX can't figure out the location of a method defined in C.</p>
 
 <h2>Reporting bugs</h2>
 

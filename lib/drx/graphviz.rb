@@ -77,7 +77,7 @@ module Drx
       return '' if seen
 
       if class_like?
-        if spr = self.super
+        if spr = self.super and display_super?(spr)
           out << spr.dot_source(level+1, &block)
           if [Module, ObjInfo.new(Module).klass.the_object].include? the_object
             # We don't want these relatively insignificant lines to clutter the display,
@@ -89,15 +89,11 @@ module Drx
         end
       end
 
-      # Dipslaying a T_ICLASS's klass isn't very useful, because the data
-      # is already mirrored in the m_tbl and iv_tvl of the T_ICLASS itself.
-      if not t_iclass?
-        # Displaying a singletone's class is confusing and usually unneeded.
-        if not singleton?
-          out << klass.dot_source(level+1, &block)
-          out << "#{dot_id} -> #{klass.dot_id} [style=dotted];" "\n"
-          out << "{ rank=same; #{dot_id}; #{klass.dot_id}; }" "\n"
-        end
+      kls = effective_klass
+      if display_klass?(kls)
+        out << kls.dot_source(level+1, &block)
+        out << "#{dot_id} -> #{kls.dot_id} [style=dotted];" "\n"
+        out << "{ rank=same; #{dot_id}; #{kls.dot_id}; }" "\n"
       end
 
       if level.zero?
@@ -105,6 +101,48 @@ module Drx
       end
 
       return out
+    end
+
+    # Whether to display the klass.
+    def display_klass?(kls)
+      if t_iclass?
+        # We're interested in an ICLASS's klass only if it isn't Module.
+        #
+        # Usualy this means that the ICLASS has a singleton (see "Singletons
+        # of included modules" in display_super?()). We want to see this
+        # singleton.
+        return Module != kls.the_object
+      else
+        # Displaying a singletone's klass is confusing and usually unneeded.
+        return !singleton?
+      end
+    end
+
+    # Whether to display the super.
+    def display_super?(spr)
+      if (singleton? or t_iclass?) and Module == spr.the_object
+         # Singletons of included modules, and modules included in them,
+         # have their chain eventually reach Module. To prevent clutter,
+         # we don't show this final link.
+         #
+         # "Singletons of included modules" often exist only for their
+         # #included method. For example, DataMapper#Resource have
+         # such a singleton.
+        return false
+      end
+      return true
+    end
+
+    # Like klass(), but without surprises.
+    #
+    # Since the klass of an ICLASS is the module itself, we need to
+    # invoke klass() twice.
+    def effective_klass
+      if t_iclass?
+        klass.klass
+      else
+        klass
+      end
     end
 
     # Generates a diagram of the inheritance hierarchy. It accepts a hash

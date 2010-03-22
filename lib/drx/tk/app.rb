@@ -17,6 +17,7 @@ module Drx
       def initialize
         @navigation_history = []
         @eval_history = LineHistory.new
+        @graph_opts = { :size => '100%' }
 
         @eval_entry = TkEntry.new(toplevel) {
           font 'Courier'
@@ -60,6 +61,13 @@ module Drx
           column_configure('name', :stretch => false )
           column_configure('location', :stretch => false )
           show 'headings'
+        }
+
+        @size_menu = Tk::Tile::Combobox.new(toplevel) {
+          set '100%'
+          values [ '100%', '80%', '60%']
+          state :readonly
+          width 8
         }
 
         layout
@@ -107,16 +115,21 @@ module Drx
         toplevel.bind('Control-r') {
           # Refresh the display. Useful if you eval'ed some code that changes the
           # object inspected.
-          navigate_to tip
+          refresh
           # Note: it seems that #instance_eval creates a singleton for the object.
           # So after eval'ing something and pressing C-r, you're going to see this
           # extra class.
+        }
+        @size_menu.bind('<ComboboxSelected>') {
+          @graph_opts[:size] = @size_menu.get
+          refresh
         }
 
         output "Please visit the homepage, http://drx.rubyforge.org/, for usage instructions.\n", 'info'
       end
 
       def vbox(*args); VBox.new(toplevel, args); end
+      def hbox(*args); HBox.new(toplevel, args); end
 
       # Arrange the main widgets inside layout widgets.
       def layout
@@ -140,7 +153,8 @@ module Drx
         # Note the :weight's on the followings.
         panes.add vbox(
           TkLabel.new(toplevel, :text => 'Object graph (klass and super):', :anchor => 'w'),
-          [Scrolled.new(toplevel, @im), { :expand => true, :fill => 'both' } ]
+          [Scrolled.new(toplevel, @im), { :expand => true, :fill => 'both' } ],
+          hbox(TkLabel.new(toplevel, :text => 'Size: '), @size_menu)
         ), :weight => 10
         panes.add vbox(
           TkLabel.new(toplevel, :text => 'Variables (iv_tbl):', :anchor => 'w'),
@@ -262,7 +276,7 @@ module Drx
         require 'drx/tempfiles'
         @objs = {}
         Tempfiles.new do |files|
-          ObjInfo.new(obj).generate_diagram(files) do |info|
+          ObjInfo.new(obj).generate_diagram(files, @graph_opts) do |info|
             @objs[info.dot_url] = info
           end
           @im.image = files['gif']
@@ -284,6 +298,11 @@ module Drx
       # Returns the tip object in the diagram (the one passed to navigate_to())
       def tip
         @navigation_history.last
+      end
+
+      # Refreshes the display.
+      def refresh
+        navigate_to tip
       end
 
       # Make `obj` the selected object. That is, the one the variable and method boxes reflect.
@@ -369,11 +388,23 @@ module Drx
       def initialize(parent, widgets)
         super(parent)
         widgets.each { |w, layout|
-          layout = {} if layout.nil?
-          layout = { :in => self, :side => 'top', :fill => 'x' }.merge layout
+          layout = default_layout.merge(layout || {})
           w.raise
           w.pack(layout)
         }
+      end
+      def default_layout
+        { :in => self, :side => 'top', :fill => 'x' }
+      end
+      def raise
+        pack_slaves.each {|w| w.raise }
+      end
+    end
+
+    # Arranges widgets one beside the other.
+    class HBox < VBox
+      def default_layout
+        { :in => self, :side => 'left', :fill => 'y' }
       end
     end
 

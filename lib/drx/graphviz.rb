@@ -4,6 +4,26 @@ module Drx
 
   class ObjInfo
 
+    @@sizes = {
+      '100%' => "
+        node[fontsize=10]
+      ",
+      '80%' => "
+        node[fontsize=10]
+        ranksep=0.3
+        nodesep=0.2
+        node[height=0.4]
+        edge[arrowsize=0.6]
+      ",
+      '60%' => "
+        node[fontsize=8]
+        ranksep=0.18
+        nodesep=0.2
+        node[height=0]
+        edge[arrowsize=0.5]
+      "
+    }
+
     # Create an ID for the DOT node representing this object.
     def dot_id
        ('o' + address.to_s).sub('-', '_')
@@ -52,7 +72,7 @@ module Drx
       end
     end
 
-    def dot_source(level = 0, &block) # :yield:
+    def dot_source(level = 0, opts = {}, &block) # :yield:
       out = ''
       # Note: since 'obj' may be a T_ICLASS, it doesn't repond to many methods,
       # including is_a?. So when we're querying things we're using Drx calls
@@ -60,8 +80,7 @@ module Drx
 
       if level.zero?
         out << 'digraph {' "\n"
-        out << '/*size="8,8";*/' "\n"
-        out << 'node [fontsize=10];' "\n"
+        out << @@sizes[opts[:size] || '100%']
         @@seen = {}
       end
 
@@ -78,7 +97,7 @@ module Drx
 
       if class_like?
         if spr = self.super and display_super?(spr)
-          out << spr.dot_source(level+1, &block)
+          out << spr.dot_source(level+1, opts, &block)
           if [Module, ObjInfo.new(Module).klass.the_object].include? the_object
             # We don't want these relatively insignificant lines to clutter the display,
             # so we paint them lightly and tell DOT they aren't to affect the layout (width=0).
@@ -91,7 +110,7 @@ module Drx
 
       kls = effective_klass
       if display_klass?(kls)
-        out << kls.dot_source(level+1, &block)
+        out << kls.dot_source(level+1, opts, &block)
         out << "#{dot_id} -> #{kls.dot_id} [style=dotted];" "\n"
         out << "{ rank=same; #{dot_id}; #{kls.dot_id}; }" "\n"
       end
@@ -155,8 +174,8 @@ module Drx
     #     system('xview ' + files['gif'])
     #   end
     #
-    def generate_diagram(files, &block)
-      source = self.dot_source(&block)
+    def generate_diagram(files, opts = {}, &block)
+      source = self.dot_source(0, opts, &block)
       File.open(files['dot'], 'w') { |f| f.write(source) }
 
       # Note: Windows's CMD.EXE too supports "2>&1" (However, this is not

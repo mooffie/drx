@@ -140,7 +140,7 @@ module Drx
         # Note the :weight's on the followings.
         panes.add vbox(
           TkLabel.new(toplevel, :text => 'Object graph (klass and super):', :anchor => 'w'),
-          [@im, { :expand => true, :fill => 'both' } ]
+          [Scrolled.new(toplevel, @im), { :expand => true, :fill => 'both' } ]
         ), :weight => 10
         panes.add vbox(
           TkLabel.new(toplevel, :text => 'Variables (iv_tbl):', :anchor => 'w'),

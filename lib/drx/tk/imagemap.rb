@@ -2,12 +2,20 @@ class TkCanvas
   def coords(evt)
     return [canvasx(evt.x), canvasy(evt.y)]
   end
+
+  # TkCanvas redefines raise() (and lower()) to operate on tags.
+  # But our layout classes (VBox and Scrolled) require a proper raise(),
+  # so we restore its behavior.
+  # @todo: find out the "correct" way to do it.
+  def raise
+    super
+  end
 end
 
 module TkImageMap
 
   # A widget to show an image together with an HTML imagemap.
-  class ImageMap < TkFrame
+  class ImageMap < TkCanvas
 
     def select_command &block
       @select_command = block
@@ -22,10 +30,12 @@ module TkImageMap
       @hotspots.map { |h| h[:url] }
     end
 
-    # Delegates all bindings to the canvas. That's probably what the
-    # programmer expects.
-    def bind(*args, &block)
-      @canvas.bind *args, &block
+    # I'm not yet sure I want ImageMap to be a TkCanvas directly (an
+    # alternative would be for it to control an external canvas). So,
+    # for future compatibility, I access the canvas through canvas()
+    # instead of assuming it's 'self'.
+    def canvas
+      self
     end
 
     def initialize(parent, *rest)
@@ -37,22 +47,16 @@ module TkImageMap
       @select_command = proc {}
       @double_select_command = proc {}
 
-      @canvas = TkCanvas.new self, :scrollregion => [0, 0, 2000, 2000]
-
-      v_scr = TkScrollbar.new(self, :orient => 'vertical').pack :side=> 'right', :fill => 'y'
-      h_scr = TkScrollbar.new(self, :orient => 'horizontal').pack :side=> 'bottom', :fill => 'x'
-      @canvas.xscrollbar(h_scr)
-      @canvas.yscrollbar(v_scr)
       # Attach scrolling to middle button.
-      @canvas.bind('2', proc { |x,y| @canvas.scan_mark(x,y) }, '%x %y')
-      @canvas.bind('B2-Motion', proc { |x,y| @canvas.scan_dragto x, y }, '%x %y')
+      canvas.bind('2', proc { |x,y| canvas.scan_mark(x,y) }, '%x %y')
+      canvas.bind('B2-Motion', proc { |x,y| canvas.scan_dragto x, y }, '%x %y')
 
-      @canvas.pack :expand => true, :fill => 'both'
+      canvas.pack :expand => true, :fill => 'both'
 
       ['Motion','Control-Motion'].each { |sequence|
-        @canvas.bind sequence do |evt|
-          x, y = @canvas.coords(evt)
-          spot = @canvas.find('overlapping', x, y, x + 1, y + 1).first
+        canvas.bind sequence do |evt|
+          x, y = canvas.coords(evt)
+          spot = canvas.find('overlapping', x, y, x + 1, y + 1).first
           if spot and spot.cget('tags').include? 'hotspot'
             new_hover_region = spot.hotspot_region
           else
@@ -68,31 +72,31 @@ module TkImageMap
           end
         end
       }
-      @canvas.bind 'Button-1' do |evt|
-        x, y = @canvas.coords(evt)
-        spot = @canvas.find('overlapping', x, y, x+1, y+1).first
+      canvas.bind 'Button-1' do |evt|
+        x, y = canvas.coords(evt)
+        spot = canvas.find('overlapping', x, y, x+1, y+1).first
         if spot and spot.cget('tags').include? 'hotspot'
           self.active_region = spot.hotspot_region
         else
           self.active_region = nil
         end
       end
-      @canvas.bind 'Double-Button-1' do
+      canvas.bind 'Double-Button-1' do
         @double_select_command.call(active_url) if @active_region
       end
       # Middle button: vertical scrolling.
-      @canvas.bind 'Button-4' do
-        @canvas.yview_scroll(-1, 'units')
+      canvas.bind 'Button-4' do
+        canvas.yview_scroll(-1, 'units')
       end
-      @canvas.bind 'Button-5' do
-        @canvas.yview_scroll(1, 'units')
+      canvas.bind 'Button-5' do
+        canvas.yview_scroll(1, 'units')
       end
       # Middle button: horizontal scrolling.
-      @canvas.bind 'Shift-Button-4' do
-        @canvas.xview_scroll(-1, 'units')
+      canvas.bind 'Shift-Button-4' do
+        canvas.xview_scroll(-1, 'units')
       end
-      @canvas.bind 'Shift-Button-5' do
-        @canvas.xview_scroll(1, 'units')
+      canvas.bind 'Shift-Button-5' do
+        canvas.xview_scroll(1, 'units')
       end
     end
 
@@ -124,15 +128,15 @@ module TkImageMap
 
     def image=(pathname)
       @image = TkPhotoImage.new :file => pathname
-      @canvas.configure :scrollregion => [0, 0, @image.width, @image.height]
+      canvas.configure :scrollregion => [0, 0, @image.width, @image.height]
     end
 
     # You must call this after image=()
     def image_map=(pathname)
       # Delete the previous spot widgets and the image widget.
-      @canvas.find('all').each {|w| w.destroy }
-      @canvas.xview_moveto(0)
-      @canvas.yview_moveto(0)
+      canvas.find('all').each {|w| w.destroy }
+      canvas.xview_moveto(0)
+      canvas.yview_moveto(0)
 
       @hotspots = Utils.parse_imap(pathname)
 
@@ -140,7 +144,7 @@ module TkImageMap
       # Create the back spots.
       #
       @hotspots.each do |region|
-        args = [@canvas, *(region[:args])]
+        args = [canvas, *(region[:args])]
         opts = {
           :fill => 'red',
           :tags => ['hotspot']
@@ -156,13 +160,13 @@ module TkImageMap
         end
       end
 
-      @image_widget = TkcImage.new(@canvas,0,0, :image => @image, :anchor=> 'nw')
+      @image_widget = TkcImage.new(canvas,0,0, :image => @image, :anchor=> 'nw')
 
       #
       # Create the hover spots.
       #
       @hotspots.each do |region|
-        args = [@canvas, *(region[:args])]
+        args = [canvas, *(region[:args])]
         opts = {
           :dash => '. ',
           :width => 5,

@@ -340,7 +340,7 @@ module Drx
         @the_widget = the_widget
         if opts[:vertical]
           TkScrollbar.new(self) { |s|
-            pack :side => 'right', :fill => 'y'
+            grid(:row => 0, :column => 1, :rowspan => 1, :columnspan => 1, :sticky => 'news')
             command { |*args| the_widget.yview *args }
             the_widget.yscrollcommand { |first,last| s.set first,last }
           }
@@ -348,13 +348,15 @@ module Drx
         if opts[:horizontal]
           TkScrollbar.new(self) { |s|
             orient 'horizontal'
-            pack :side => 'bottom', :fill => 'x'
+            grid(:row => 1, :column => 0, :rowspan => 1, :columnspan => 1, :sticky => 'news')
             command { |*args| the_widget.xview *args }
             the_widget.xscrollcommand { |first,last| s.set first,last }
           }
         end
         the_widget.raise  # Since the frame is created after the widget, it obscures it by default.
-        the_widget.pack(:in => self, :side => 'left', :expand => 'true', :fill => 'both')
+        the_widget.grid(:in => self, :row => 0, :column => 0, :rowspan => 1, :columnspan => 1, :sticky => 'news')
+        TkGrid.rowconfigure(self, 0, :weight => 1, :minsize => 0)
+        TkGrid.columnconfigure(self, 0, :weight => 1, :minsize => 0)
       end
       def raise
         super

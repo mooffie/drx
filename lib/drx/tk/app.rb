@@ -1,6 +1,7 @@
 require 'tk'
-Tk.default_widget_set = :Ttk
 require 'drx/tk/imagemap'
+
+Tk.default_widget_set = :Ttk
 
 module Drx
   module TkGUI
@@ -126,6 +127,26 @@ module Drx
         }
 
         output "Please visit the homepage, http://drx.rubyforge.org/, for usage instructions.\n", 'info'
+
+        one_time_initialization
+        user_customizations
+      end
+
+      def one_time_initialization
+        @@one_time_initialization ||= begin
+          # Try to make the Unixy GUI less ugly.
+          if Tk.windowingsystem == 'x11' and Ttk.themes.include? 'clam'
+            Ttk.set_theme 'clam'
+          end
+          rc = File.join(ENV['HOME'] || Dir.pwd, '.drxrc')
+          load rc if File.exist? rc
+          1
+        end
+      end
+
+      # Users may redefine this method in their ~/.drxrc
+      # to fine-tune the app.
+      def user_customizations
       end
 
       def vbox(*args); VBox.new(toplevel, args); end

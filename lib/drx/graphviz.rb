@@ -4,6 +4,9 @@ module Drx
 
   class ObjInfo
 
+    # Note: Windows's CMD.EXE too supports "2>&1"
+    GRAPHVIZ_COMMAND = 'dot "%s" -Tgif -o "%s" -Tcmapx -o "%s" 2>&1'
+
     @@sizes = {
       '100%' => "
         node[fontsize=10]
@@ -177,11 +180,7 @@ module Drx
     def generate_diagram(files, opts = {}, &block)
       source = self.dot_source(0, opts, &block)
       File.open(files['dot'], 'w') { |f| f.write(source) }
-
-      # Note: Windows's CMD.EXE too supports "2>&1" (However, this is not
-      # supported on good old Windows 98).
-      command = 'dot "%s" -Tgif -o "%s" -Tcmapx -o "%s" 2>&1' % [files['dot'], files['gif'], files['map']]
-
+      command = GRAPHVIZ_COMMAND % [files['dot'], files['gif'], files['map']]
       message = Kernel.`(command)  # `
       if $? != 0
         error = <<-EOS % [command, message]

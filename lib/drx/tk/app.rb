@@ -68,13 +68,19 @@ module Drx
           set '100%'
           values ['100%', '90%', '80%', '60%']
           state :readonly
-          width 8
+          width 6
         }
         @graph_style_menu = Tk::Tile::Combobox.new(toplevel) {
           set 'default'
           values ['default', 'crazy']
           state :readonly
-          width 15
+          width 10
+        }
+        @save_btn = TkButton.new(toplevel) {
+          text 'Save...'
+        }
+        @save_btn.command {
+          save_graph tip
         }
 
         layout
@@ -161,6 +167,7 @@ module Drx
 
       def vbox(*args); VBox.new(toplevel, args); end
       def hbox(*args); HBox.new(toplevel, args); end
+      def separator; TkLabel.new(toplevel, :text => '  '); end
 
       # Arrange the main widgets inside layout widgets.
       def layout
@@ -173,7 +180,7 @@ module Drx
         main_frame.add vbox(
           [Scrolled.new(toplevel, @eval_result, :vertical => true), { :expand => true, :fill => 'both' } ],
           TkLabel.new(toplevel, :anchor => 'w') {
-            text 'Type some code to eval; \'self\' is the object at the base of the graph; prepend with "see" to examine result.'
+            text 'Type some code to eval; \'self\' is the object at the base of the graph; prepend with "see" to inspect result.'
           },
           @eval_entry
         )
@@ -186,7 +193,10 @@ module Drx
           TkLabel.new(toplevel, :text => 'Object graph (klass and super):', :anchor => 'w'),
           [Scrolled.new(toplevel, @im), { :expand => true, :fill => 'both' } ],
           hbox(TkLabel.new(toplevel, :text => 'Size: '), @graph_size_menu,
-               TkLabel.new(toplevel, :text => '   Style: '), @graph_style_menu)
+               separator,
+               TkLabel.new(toplevel, :text => 'Style: '), @graph_style_menu,
+               separator,
+               [@save_btn, { :pady => 5 }])
         ), :weight => 10
         panes.add vbox(
           TkLabel.new(toplevel, :text => 'Variables (iv_tbl):', :anchor => 'w'),
@@ -316,6 +326,17 @@ module Drx
         end
       end
 
+      # Saves the graph to a file.
+      def save_graph(obj)
+        require 'drx/tempfiles'
+        Tempfiles.new do |files|
+          ObjInfo.new(obj).generate_diagram(files, @graph_opts)
+          if (output = Tk.getSaveFile(:parent => toplevel, :defaultextension => '.gif')) != ''
+            FileUtils.cp(files['gif'], output)
+          end
+        end
+      end
+
       # Makes `obj` the primary object seen (the one which is the tip of the diagram).
       def navigate_to(obj)
         @current_object = obj
@@ -436,7 +457,7 @@ module Drx
     # Arranges widgets one beside the other.
     class HBox < VBox
       def default_layout
-        { :in => self, :side => 'left', :fill => 'y' }
+        { :in => self, :side => 'left', :fill => 'none' }
       end
     end
 

@@ -11,6 +11,11 @@ module Drx
       '100%' => "
         node[fontsize=10]
       ",
+      '90%' => "
+        node[fontsize=10]
+        ranksep=0.4
+        edge[arrowsize=0.8]
+      ",
       '80%' => "
         node[fontsize=10]
         ranksep=0.3
@@ -44,10 +49,10 @@ module Drx
     end
 
     # Returns the DOT style for the node.
-    def dot_style
+    def dot_style__default
       if singleton?
         # A singleton class
-        "shape=egg,color=lightblue1,style=filled"
+        "shape=oval,color=skyblue1,style=filled"
       elsif t_class?
         # A class
         "shape=oval,color=lightblue1,style=filled"
@@ -57,6 +62,26 @@ module Drx
       else
         # Else: a "normal" object, or an immediate.
         "shape=house,color=wheat1,style=filled"
+      end
+    end
+
+    # Returns the DOT style for the node.
+    def dot_style__crazy
+      craze = "distortion=#{2*rand-1},skew=#{2*rand-1},orientation=#{360*rand}"
+      crazy_oval = "shape=polygon,sides=25," + craze
+      crazy_rect = "shape=polygon,sides=#{4+rand(3)}," + craze
+      if singleton?
+        # A singleton class
+        "#{crazy_oval},color=palevioletred3,style=filled,fontcolor=white,peripheries=3"
+      elsif t_class?
+        # A class
+        "#{crazy_oval},color=palevioletred1,style=filled"
+      elsif t_iclass? or t_module?
+        # A module
+        "#{crazy_rect},color=peachpuff1,style=filled"
+      else
+        # Else: a "normal" object, or an immediate.
+        "shape=house,color=pink,style=filled"
       end
     end
 
@@ -91,6 +116,7 @@ module Drx
       @@seen[address] = true
 
       if not seen
+        dot_style = method('dot_style__' + (opts[:style] || 'default')).call
         out << "#{dot_id} [#{dot_style}, label=#{dot_quote dot_label}, URL=#{dot_quote dot_url}];" "\n"
       end
 

@@ -18,7 +18,7 @@ module Drx
       def initialize
         @navigation_history = []
         @eval_history = LineHistory.new
-        @graph_opts = { :size => '100%' }
+        @graph_opts = { :size => '100%', :style => 'default' }
 
         @eval_entry = TkEntry.new(toplevel) {
           font 'Courier'
@@ -64,11 +64,17 @@ module Drx
           show 'headings'
         }
 
-        @size_menu = Tk::Tile::Combobox.new(toplevel) {
+        @graph_size_menu = Tk::Tile::Combobox.new(toplevel) {
           set '100%'
-          values [ '100%', '80%', '60%']
+          values ['100%', '90%', '80%', '60%']
           state :readonly
           width 8
+        }
+        @graph_style_menu = Tk::Tile::Combobox.new(toplevel) {
+          set 'default'
+          values ['default', 'crazy']
+          state :readonly
+          width 15
         }
 
         layout
@@ -121,8 +127,12 @@ module Drx
           # So after eval'ing something and pressing C-r, you're going to see this
           # extra class.
         }
-        @size_menu.bind('<ComboboxSelected>') {
-          @graph_opts[:size] = @size_menu.get
+        @graph_size_menu.bind('<ComboboxSelected>') {
+          @graph_opts[:size] = @graph_size_menu.get
+          refresh
+        }
+        @graph_style_menu.bind('<ComboboxSelected>') {
+          @graph_opts[:style] = @graph_style_menu.get
           refresh
         }
 
@@ -163,7 +173,7 @@ module Drx
         main_frame.add vbox(
           [Scrolled.new(toplevel, @eval_result, :vertical => true), { :expand => true, :fill => 'both' } ],
           TkLabel.new(toplevel, :anchor => 'w') {
-            text 'Type some code to eval; \'self\' is the object at tip of diagram; prepend with "see" to examine result.'
+            text 'Type some code to eval; \'self\' is the object at the base of the graph; prepend with "see" to examine result.'
           },
           @eval_entry
         )
@@ -175,7 +185,8 @@ module Drx
         panes.add vbox(
           TkLabel.new(toplevel, :text => 'Object graph (klass and super):', :anchor => 'w'),
           [Scrolled.new(toplevel, @im), { :expand => true, :fill => 'both' } ],
-          hbox(TkLabel.new(toplevel, :text => 'Size: '), @size_menu)
+          hbox(TkLabel.new(toplevel, :text => 'Size: '), @graph_size_menu,
+               TkLabel.new(toplevel, :text => '   Style: '), @graph_style_menu)
         ), :weight => 10
         panes.add vbox(
           TkLabel.new(toplevel, :text => 'Variables (iv_tbl):', :anchor => 'w'),

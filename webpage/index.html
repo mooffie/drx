@@ -16,6 +16,9 @@ em {
 .color-class {
   background: #bfefff; /* lightblue1 */
 }
+.color-singleton {
+  background: #87ceff; /* skyblue1 */
+}
 .color-object {
   background: #ffe7ba; /* wheat1 */
 }
@@ -107,7 +110,7 @@ additional methods".</p>
 
 <ul>
 <li class="color-module">Modules are shown in green</li>
-<li class="color-class">Classes are blue ovals. Singletons are blue eggs, and have "'S" appended to their label.</li>
+<li class="color-class">Classes are blue ovals. <span class="color-singleton">Singletons are darker, and have "'S" appended to their label.</span></li>
 <li class="color-object">Mere objects are brownish houses.</li>
 </ul>
 
@@ -169,8 +172,13 @@ post.see
 # Or just do Post.see
 </pre>
 
-<p>...and you'd get the window shown in the screenshot above (click to
+<p>...and you'd get a window showing you the following graph (click to
 enlarge).</p>
+
+<div align=center>
+  <a href="datamapper.png"><img width="500" height="444"
+    src="datamapper_thumb.png" title="Screenshot showing DrX in action" /></a>
+</div>
 
 <p>In the graph you'll notice two distinct lines of hierarchy. One describes the
 Post class: most importanly it contains the
@@ -178,9 +186,6 @@ Post class: most importanly it contains the
 class' singleton: most importanly it contains the
 <em>DataMapper::Model</em> class. Take a minute to click these two
 classes and examine the methods they contain.</p>
-
-<p>(The screenshot happens to have the DataMapper::Model class selected.
-You can see the 'find_by_sql' and 'property' method on the right. ::UPDATE::)</p>
 
 <h2>Example 2: Investigating things</h2>
 
@@ -191,27 +196,19 @@ Specifically, we want to know how DataMapper::Model got there. We
 suspect that DataMapper::Resource does this magic in its
 <code>#included</code>, and we want to verify this theory.</p>
 
-<p>Let's inspect DataMapper::Resource more closely. Double-click the
-"include DataMapper::Resource" box. In the new graph you'll see a
-<em>klass</em> arrow pointing right; it's pointing to the singleton of
-the module. (Why wasn't this shown in the previous graph? Because DrX
-doesn't show <em>klass</em>es of anonymous classes and of singletons, to
-prevent clutter). Click this singleton to inspect its methods:</p>
-
-<p>::SCR::</p>
-
-<p>Aha! We see that it indeed has an <code>included</code> method defined.
-Doule click it to open it up in an editor:</p>
+<p>In other words, we want to peek into DataMapper::Resource's
+singleton. Click the "DataMapper::Resource 'S" oval, this is the
+singleton, to inspect its methods:</p>
 
 <div align=center>
-  <a href="screenshot2.png"><img width="530" height="380"
-    src="screenshot2.png" title="Screenshot showing DrX in action" /></a>
+  <a href="editor.png"><img width="500" height="375"
+    src="editor_thumb.png" title="Screenshot showing DrX in action" /></a>
 </div>
 
-<p>Yep, our suspicion was correct: the <em>Model</em> class is added to the
+<p>Aha! We see that it indeed has an <code>included</code> method defined.
+Doule click it to open it up in an editor (as demonstrated in the screenshot).
+Yep, our suspicion was correct: the <em>Model</em> class is added to the
 singleton in <code>Resource.included</code>. The mystery was solved!</p>
-
-<p>(You can now navigate to <code>DataMapper::Model.extended</code> and see how the other classes are added.)</p>
 
 <h2>Understanding DrX</h2>
 

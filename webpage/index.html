@@ -10,6 +10,7 @@
 em {
   font-weight: bold;
 }
+
 .color-module {
   background: #7fffd4; /* aquamarine */
 }
@@ -22,6 +23,19 @@ em {
 .color-object {
   background: #ffe7ba; /* wheat1 */
 }
+
+div.gallery {
+  float: right;
+  background: #eee;
+  border: 1px #888 solid;
+  padding: 1em;
+  margin-left: 1.5em;
+}
+div.gallery h2 {
+  font-family: serif;
+  font-style: italic;
+  text-align: center;
+}
 </style>
 <title>DrX -- The Good Doctor</title>
 <link rel="stylesheet" href="index.css" type="text/css">
@@ -29,8 +43,12 @@ em {
 
 <h1>DrX</h1>
 
-<a href="screenshot1.png"><img align="right" width="400" height="410" class="main"
-  src="screenshot1.png" title="Screenshot showing DrX in action" /></a>
+<div class="gallery">
+<h2>Gallery</h2>
+  <a href="314.png"><img width="300" height="255" src="314_thumb.png" /></a>
+    <br /> <br />
+  <a href="file.png"><img width="300" height="255" src="file_thumb.png" /></a>
+</div>
 
 <p>DrX, the good doctor, is a small <em>object inspector</em> for Ruby.
 
@@ -85,7 +103,7 @@ s.see
 <li>MRI Ruby 1.8 (Code wasn't yet ported to Ruby 1.9).</li>
 <li>Ability to compile Ruby C extenstions (Because DrX has some part written in C).</li>
 <li>The Tk user interface toolkit.</li>
-<li>The <a href="todo-update-this-link">graphviz</a> package installed (It's used to draw the diagrams).</li>
+<li>The <a href="http://www.graphviz.org/">graphviz</a> package installed (It's used to draw the diagrams).</li>
 </ul>
 
 <h2>The object graph</h2>
@@ -175,7 +193,7 @@ post.see
 <p>...and you'd get a window showing you the following graph (click to
 enlarge).</p>
 
-<div align=center>
+<div align="center">
   <a href="datamapper.png"><img width="500" height="444"
     src="datamapper_thumb.png" title="Screenshot showing DrX in action" /></a>
 </div>
@@ -200,7 +218,7 @@ suspect that DataMapper::Resource does this magic in its
 singleton. Click the "DataMapper::Resource 'S" oval, this is the
 singleton, to inspect its methods:</p>
 
-<div align=center>
+<div align="center">
   <a href="editor.png"><img width="500" height="375"
     src="editor_thumb.png" title="Screenshot showing DrX in action" /></a>
 </div>

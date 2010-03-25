@@ -5,9 +5,6 @@ body {
   padding-right: 3em;
   line-height: 130%;
 }
-img.main {
-  margin-left: 2em;
-}
 h1, h2, h3 { color: #005A9C }
 h1 { font: 170% sans-serif }
 h2 { font: 140% sans-serif }

@@ -4,7 +4,10 @@ module Drx
 
   class ObjInfo
 
-    # Note: Windows's CMD.EXE too supports "2>&1"
+    # Notes:
+    # - Windows' CMD.EXE too supports "2>&1"
+    # - We're generating GIF, not PNG, because that's a format Tk
+    #   supports out of the box.
     GRAPHVIZ_COMMAND = 'dot "%s" -Tgif -o "%s" -Tcmapx -o "%s" 2>&1'
 
     @@sizes = {
@@ -58,7 +61,12 @@ module Drx
         "shape=oval,color=lightblue1,style=filled"
       elsif t_iclass? or t_module?
         # A module
-        "shape=box,color=aquamarine,style=filled"
+        if repr['#']
+          # Paint anonymous modules only lightly.
+          "shape=box,style=filled,color=\"#D9FFF2\",fontcolor=gray60"
+        else
+          "shape=box,style=filled,color=aquamarine"
+        end
       else
         # Else: a "normal" object, or an immediate.
         "shape=house,color=wheat1,style=filled"
@@ -86,17 +94,20 @@ module Drx
     end
 
     # Returns the DOT label for the node.
+    #
+    # The representation may be quite big, so we trim it.
     def dot_label(max = 20)
       if class_like?
-        repr
+        # Let's be more lenient when trimming a class/module name.
+        # We want to show The::Last::Component and possibly a singleton's
+        # trailing 'S.
+        max = 60 if max < 60
+      end
+      r = repr
+      if r.length > max
+        r[0, max] + ' ...'
       else
-        # The representation may be quite big, so we trim it.
-        r = repr
-        if r.length > max
-          r[0, max] + ' ...'
-        else
-          r
-        end
+        r
       end
     end
 

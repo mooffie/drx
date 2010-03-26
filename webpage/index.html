@@ -200,10 +200,10 @@ enlarge).</p>
 
 <p>In the graph you'll notice two distinct lines of hierarchy. One describes the
 Post class: most importanly it contains the
-<em>DataMapper::Resource</em> class. The other line describes the Post
+<em>DataMapper::Resource</em> module. The other line describes the Post
 class' singleton: most importanly it contains the
-<em>DataMapper::Model</em> class. Take a minute to click these two
-classes and examine the methods they contain.</p>
+<em>DataMapper::Model</em> module. Take a moment to click these two
+modules and examine the methods they contain.</p>
 
 <h2>Example 2: Investigating things</h2>
 
@@ -215,18 +215,19 @@ suspect that DataMapper::Resource does this magic in its
 <code>#included</code>, and we want to verify this theory.</p>
 
 <p>In other words, we want to peek into DataMapper::Resource's
-singleton. Click the "DataMapper::Resource 'S" oval, this is the
-singleton, to inspect its methods:</p>
+singleton. Click the "DataMapper::Resource 'S" oval (this is the
+singleton) to inspect its methods:</p>
 
 <div align="center">
   <a href="editor.png"><img width="500" height="375"
     src="editor_thumb.png" title="Screenshot showing DrX in action" /></a>
 </div>
 
-<p>Aha! We see that it indeed has an <code>included</code> method defined.
-Doule click it to open it up in an editor (as demonstrated in the screenshot).
-Yep, our suspicion was correct: the <em>Model</em> class is added to the
-singleton in <code>Resource.included</code>. The mystery was solved!</p>
+<p>Aha! We see that it indeed has an <code>included</code> method
+defined. Doule click on the method to open it up in an editor (as
+demonstrated in the screenshot). Yep, our suspicion was correct: the
+<em>Model</em> module is added to our Post class in
+<code>Resource.included</code>. The mystery was solved!</p>
 
 <h2>Understanding DrX</h2>
 
@@ -329,13 +330,34 @@ the 'iv_tbl', and the 'm_tbl'.</p>
 <p>When you double-click a method, DrX launches the command <code>gedit +%d "%s"</code>
 by default (%d and %s are substituted by the line-number
 and file-name). If you wish to use some other editor, set your
-'DRX_EDITOR_COMMAND' environment variable accordingly.</p>
+'DRX_EDITOR_COMMAND' environment variable accordingly (or see the next section).</p>
+
+<p>Note that <em>gedit</em> has a bug: it positions the cursor on the
+correct line, but sometimes it doesn't update the display and shows the
+first page of the file. If this happens, click arrow-up, then
+arrow-down, to update the display. Or use some other editor.</p>
 
 <p>DrX figures out a method's location by inspecting Ruby's internal
 nodes. This functionality is contained in a small C extension built when
 you install the DrX gem.</p>
 
-<p>Of course, DrX can't figure out the location of a method defined in C.</p>
+<p>Of course, DrX can't figure out the location of a method written in C.</p>
+
+<h2>The ~/.drxrc file</h2>
+
+DrX lets you put your customizations in the file <code>~/.drxrc</code>. Here's an example:
+
+<pre>
+class Drx::TkGUI::Application
+  def user_customizations
+    @eval_result.height = 8
+    @graph_opts[:size] = '60%'
+    @graph_opts[:style] = 'crazy'
+  end
+end
+
+Drx::TkGUI::EDITOR_COMMAND.replace('gvim +%d "%s"')
+</pre>
 
 <h2>Reporting bugs</h2>
 

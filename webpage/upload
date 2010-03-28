@@ -1,4 +1,15 @@
-scp index.html mooffie@rubyforge.org:/var/www/gforge-projects/drx/
-scp index.css mooffie@rubyforge.org:/var/www/gforge-projects/drx/
-scp screenshot1.png mooffie@rubyforge.org:/var/www/gforge-projects/drx/
-scp screenshot2.png mooffie@rubyforge.org:/var/www/gforge-projects/drx/
+#!/bin/sh
+
+FILES="314.png
+      314_thumb.png
+      datamapper.png
+      datamapper_thumb.png
+      editor.png
+      editor_thumb.png
+      file.png
+      file_thumb.png
+      index.css
+      index.html
+      "
+
+scp $FILES mooffie@rubyforge.org:/var/www/gforge-projects/drx/

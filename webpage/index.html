@@ -36,6 +36,11 @@ div.gallery h2 {
   font-style: italic;
   text-align: center;
 }
+
+.further {
+  color: #aaa;
+  margin-left: 1em;
+}
 </style>
 <title>DrX -- The Good Doctor</title>
 <link rel="stylesheet" href="index.css" type="text/css">
@@ -99,12 +104,26 @@ s.see
 
 <h2>Requirements</h2>
 
-<ul>
+<ol>
 <li>MRI Ruby 1.8 (Code wasn't yet ported to Ruby 1.9).</li>
 <li>Ability to compile Ruby C extenstions (Because DrX has some part written in C).</li>
-<li>The Tk user interface toolkit.</li>
-<li>The <a href="http://www.graphviz.org/">graphviz</a> package installed (It's used to draw the diagrams).</li>
-</ul>
+<li>The Tk user interface toolkit.
+  <div class="further">
+    <p>You can use either the "new" Tk (version 8.5), or the "old" one (version 8.4).</p>
+    <p>However, if you use the "old" one, you must also have the Tile extension installed.
+    For exmaple, on Ubuntu do <code>sudo apt-get install tk-tile</code>. As a very last
+    resort, use an older version of DrX (earlier than 0.4), which doesn't necessiates Tile.</p>
+  </div>
+  </li>
+<li>The <a href="http://www.graphviz.org/">graphviz</a> package installed (It's used to draw the diagrams).
+  <div class="further">
+    <p>If the graphs DrX produces have ragged lines, it means your GraphViz doesn't have
+    antialiasing support. A quick way to solve this on Ubuntu is by doing
+    <code>sudo apt-get install graphviz-cairo</code>.
+    </p>
+  </div>
+  </li>
+</ol>
 
 <h2>The object graph</h2>
 
@@ -269,10 +288,7 @@ the 'iv_tbl', and the 'm_tbl'.</p>
       Why is this useful?
       <ul>
       <li>To set the 'self' for the eval line.</li>
-      <li>To see the 'klass' of an included module (in
-      other words, if you want to see "the singleton of a module"), because
-      this singleton is the 'klass' of an T_ICLASS (anonymous class) and the UI
-      by default doesn't show it to prevent clutter.</li>
+      <li>To see the "real" module behind an included one.</li>
       </ul>
   </li>
   <li><span class="gist">Scrolling</span> in the diagram is done by:
@@ -361,4 +377,8 @@ Drx::TkGUI::EDITOR_COMMAND.replace('gvim +%d "%s"')
 
 <h2>Reporting bugs</h2>
 
-<p>Please file bugs and support requests at the RubyForge <a href="http://rubyforge.org/projects/drx/">website</a>.</p>
+<p>Please file bugs and support requests at the GitHub <a
+href="http://github.com/mooffie/drx/issues">issue queue</a>. If it's
+useful in any way (I doubt it), the RubyForge project page <a
+href="http://rubyforge.org/projects/drx/">is here</a>.</p>
+

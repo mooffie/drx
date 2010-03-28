@@ -43,3 +43,55 @@ pre {
   padding: 0.7em;
   background: #f5deb3;
 }
+
+
+/*
+  The following is specific to DrX's homepage.
+ */
+
+.gist {
+  background: #ccffcc;
+}
+em {
+  font-weight: bold;
+}
+
+.color-module {
+  background: #7fffd4; /* aquamarine */
+}
+.color-class {
+  background: #bfefff; /* lightblue1 */
+}
+.color-singleton {
+  background: #87ceff; /* skyblue1 */
+}
+.color-object {
+  background: #ffe7ba; /* wheat1 */
+}
+
+div.gallery {
+  float: right;
+  background: #eee;
+  border: 1px #888 solid;
+  padding: 1em;
+  margin-left: 1.5em;
+}
+div.gallery h2 {
+  font-family: serif;
+  font-style: italic;
+  text-align: center;
+}
+
+.further {
+  color: #aaa;
+  margin-left: 1em;
+}
+
+a img {
+ border: 0;
+}
+
+dt {
+  margin-top: 1.5em;
+  margin-bottom: 0.6em;
+}

@@ -3,47 +3,8 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<style type="text/css">
-.gist {
-  background: #ccffcc;
-}
-em {
-  font-weight: bold;
-}
-
-.color-module {
-  background: #7fffd4; /* aquamarine */
-}
-.color-class {
-  background: #bfefff; /* lightblue1 */
-}
-.color-singleton {
-  background: #87ceff; /* skyblue1 */
-}
-.color-object {
-  background: #ffe7ba; /* wheat1 */
-}
-
-div.gallery {
-  float: right;
-  background: #eee;
-  border: 1px #888 solid;
-  padding: 1em;
-  margin-left: 1.5em;
-}
-div.gallery h2 {
-  font-family: serif;
-  font-style: italic;
-  text-align: center;
-}
-
-.further {
-  color: #aaa;
-  margin-left: 1em;
-}
-</style>
 <title>DrX -- The Good Doctor</title>
-<link rel="stylesheet" href="index.css" type="text/css">
+<link rel="stylesheet" href="index.css?a" type="text/css">
 </head>
 
 <h1>DrX</h1>
@@ -61,7 +22,7 @@ div.gallery h2 {
 instead focuses on its <em>object model</em>. As a result, DrX
 is most suitable for programmers wishing to understand Ruby's object
 model better. It's especially adept at showing you how a "magical"
-library works (e.g. ActiveRecord).</p>
+library works (e.g., an ORM like DataMapper or ActiveRecord).</p>
 
 <h2>Key features:</h2>
 
@@ -100,25 +61,26 @@ end
 s.see
 </pre>
 
-<p>And see the <a href="#key-bindings">Key bindings</a> section at the bottom.</p>
+<p>And see the <a href="#key-bindings">Key bindings</a> section.</p>
 
 <h2>Requirements</h2>
 
 <ol>
 <li>MRI Ruby 1.8 (Code wasn't yet ported to Ruby 1.9).</li>
-<li>Ability to compile Ruby C extenstions (Because DrX has some part written in C).</li>
+<li>Ability to compile Ruby C extensions (Because DrX has some part written in C).</li>
 <li>The Tk user interface toolkit.
   <div class="further">
     <p>You can use either the "new" Tk (version 8.5), or the "old" one (version 8.4).</p>
     <p>However, if you use the "old" one, you must also have the Tile extension installed.
-    For exmaple, on Ubuntu do <code>sudo apt-get install tk-tile</code>. As a very last
-    resort, use an older version of DrX (earlier than 0.4), which doesn't necessiates Tile.</p>
+    For example, on Ubuntu do <code>sudo apt-get install tk-tile</code>. As a very last
+    resort, use an old version of DrX which doesn't necessitates Tile
+    (that's any version earlier than 0.4).</p>
   </div>
   </li>
-<li>The <a href="http://www.graphviz.org/">graphviz</a> package installed (It's used to draw the diagrams).
+<li>The <a href="http://www.graphviz.org/">GraphViz</a> package (It's used to draw the diagrams).
   <div class="further">
     <p>If the graphs DrX produces have ragged lines, it means your GraphViz doesn't have
-    antialiasing support. A quick way to solve this on Ubuntu is by doing
+    anti-aliasing support. A quick way to solve this on Ubuntu is by doing
     <code>sudo apt-get install graphviz-cairo</code>.
     </p>
   </div>
@@ -139,8 +101,8 @@ out of an object: the <em>klass</em> arrow is shown as a dotted arrow,
 and is usually pointing to the right (horizontal); and the <em>super</em> arrow is
 shown as a solid arrow, and is usually pointing down (vertical).</p>
 
-<p>When you see a hoizontal arrow, think of it as "here are the methods
-my object responds to"; and when you see a vertical one, think "here are
+<p>When you see a horizontal arrow, think of it as "here are the methods
+the object responds to"; and when you see a vertical one, think "here are
 additional methods".</p>
 
 <h3>Colors and shapes</h2>
@@ -150,6 +112,8 @@ additional methods".</p>
 <li class="color-class">Classes are blue ovals. <span class="color-singleton">Singletons are darker, and have "'S" appended to their label.</span></li>
 <li class="color-object">Mere objects are brownish houses.</li>
 </ul>
+
+<p>(This is true for the default style only.)</p>
 
 <h2>The variables table</h2>
 
@@ -218,15 +182,15 @@ enlarge).</p>
 </div>
 
 <p>In the graph you'll notice two distinct lines of hierarchy. One describes the
-Post class: most importanly it contains the
+Post class: most importantly it contains the
 <em>DataMapper::Resource</em> module. The other line describes the Post
-class' singleton: most importanly it contains the
+class' singleton: most importantly it contains the
 <em>DataMapper::Model</em> module. Take a moment to click these two
 modules and examine the methods they contain.</p>
 
 <h2>Example 2: Investigating things</h2>
 
-<p>Let's talk more about our Post class. We only did <code>include
+<p>Let's talk more about our Post class. We merely did <code>include
 DataMapper::Resource</code> in its body and we see that it's acquired
 gazillions of things. We want to know why this had happened.
 Specifically, we want to know how DataMapper::Model got there. We
@@ -234,7 +198,7 @@ suspect that DataMapper::Resource does this magic in its
 <code>#included</code>, and we want to verify this theory.</p>
 
 <p>In other words, we want to peek into DataMapper::Resource's
-singleton. Click the "DataMapper::Resource 'S" oval (this is the
+singleton. Click the "DataMapper::Resource 'S" oval (that's the
 singleton) to inspect its methods:</p>
 
 <div align="center">
@@ -243,10 +207,19 @@ singleton) to inspect its methods:</p>
 </div>
 
 <p>Aha! We see that it indeed has an <code>included</code> method
-defined. Doule click on the method to open it up in an editor (as
+defined. Double click on the method to open it up in an editor (as
 demonstrated in the screenshot). Yep, our suspicion was correct: the
-<em>Model</em> module is added to our Post class in
-<code>Resource.included</code>. The mystery was solved!</p>
+<em>Model</em> module is added to our Post class by
+<code>Resource.included</code>. The mystery is solved!</p>
+
+<h2>Example 3: Sinatra</h2>
+
+<p>Launch DrX's GUI (for example, by doing <code>''.see</code>). At the
+eval line type <code>require 'sinatra'</code>. Then type <code>see
+Sintra</code>. In the variables table you'll see all the sub-modules and
+classes defined under the Sinatra module. Double-click any of them to
+investigate it. When you're finished with one, right-click over the
+graph to go back.</p>
 
 <h2>Understanding DrX</h2>
 
@@ -278,13 +251,13 @@ the 'iv_tbl', and the 'm_tbl'.</p>
 
 <dl>
 
-<dt>The object graph pane</dt>
+<dt>The object graph</dt>
 <dd>
   <ul>
-  <li><span class="gist">Left-click</span> an object in the diagram to <span class="gist">select</span> this object. This updates the variables and methods panes to reflect this object.
-      <ul><li>Alternatively, you can select objects by pressing <span class="gist">Control while moving</span> the mouse. This is useful for quickly skimming through the objects without straining your hands.</li></ul></li>
+  <li><span class="gist">Click</span> an object in the diagram to <span class="gist">select</span> this object. This updates the variables and methods panes to reflect this object.
+      <ul><li>Alternatively, you can select objects by holding down the <span class="gist">control key while moving</span> the mouse. This is useful for quickly skimming through the objects without straining your hands.</li></ul></li>
   <li><span class="gist">Right-click</span> to move <span class="gist">back</span> in history.</li>
-  <li><span class="gist">Double Left-click</span> an object in the diagram to make this object the <span class="gist">tip</span> of the diagram.
+  <li><span class="gist">Double-click</span> an object in the diagram to make this object the <span class="gist">tip</span> of the diagram.
       Why is this useful?
       <ul>
       <li>To set the 'self' for the eval line.</li>
@@ -293,23 +266,23 @@ the 'iv_tbl', and the 'm_tbl'.</p>
   </li>
   <li><span class="gist">Scrolling</span> in the diagram is done by:
       <ul>
-      <li>The mouse <span class="gist">wheel</span> (possibly together with <span class="gist">shift</span>).</li>
+      <li>The mouse <span class="gist">wheel</span>. (Hold down <span class="gist">shift</span> to scroll sideways.)</li>
       <li>Dragging with the <span class="gist">middle</span> mouse button.</li>
       </ul>
   </li>
   </ul>
 </dd>
 
-<dt>The variables pane</dt>
+<dt>The variables table</dt>
 <dd>
   <ul>
-  <li><span class="gist">Double left-click</span> a variable to "<span class="gist">see</span>" it.</li>
-  <li><span class="gist">Left-click</span> a variable to <span class="gist">p()</span> it.</li>
-  <li><span class="gist">Right-click</span> a variable to <span class="gist">pp()</span> it.</li>
+  <li><span class="gist">Double-click</span> a variable to "<span class="gist">see</span>" it.</li>
+  <li><span class="gist">Click</span> a variable to <span class="gist">pp()</span> it.</li>
+  <li><span class="gist">Right-click</span> a variable to <span class="gist">p()</span> it.</li>
   </ul>
 </dd>
 
-<dt>The methods pane</dt>
+<dt>The methods table</dt>
 <dd>
   <ul>
   <li><span class="gist">Double-click</span> a method to bring up an <span class="gist">editor</span> showing it.</li>
@@ -334,8 +307,10 @@ the 'iv_tbl', and the 'm_tbl'.</p>
 <dt>Anywhere</dt>
 <dd>
   <ul>
+
+  <li><span class="gist">Control-L</span> moves the keyboard focus to the eval <span class="gist">input</span> line.
+   (It should be easy to remember this: most web browsers use this key to focus on the address bar.)</li>
   <li><span class="gist">Control-R</span> <span class="gist">refreshes</span> the display. Useful if you eval'ed some code that changes the object inspected.</li>
-  <li><span class="gist">Control-L</span> moves the keyboard focus to the eval <span class="gist">input</span> line.</li>
   </ul>
 </dd>
 
@@ -349,7 +324,7 @@ and file-name). If you wish to use some other editor, set your
 'DRX_EDITOR_COMMAND' environment variable accordingly (or see the next section).</p>
 
 <p>Note that <em>gedit</em> has a bug: it positions the cursor on the
-correct line, but sometimes it doesn't update the display and shows the
+correct line, but sometimes it doesn't update the display and still shows the
 first page of the file. If this happens, click arrow-up, then
 arrow-down, to update the display. Or use some other editor.</p>
 
@@ -377,8 +352,5 @@ Drx::TkGUI::EDITOR_COMMAND.replace('gvim +%d "%s"')
 
 <h2>Reporting bugs</h2>
 
-<p>Please file bugs and support requests at the GitHub <a
-href="http://github.com/mooffie/drx/issues">issue queue</a>. If it's
-useful in any way (I doubt it), the RubyForge project page <a
-href="http://rubyforge.org/projects/drx/">is here</a>.</p>
-
+<p>Please file bug reports and support requests at the GitHub <a
+href="http://github.com/mooffie/drx/issues">issue queue</a>.</p>

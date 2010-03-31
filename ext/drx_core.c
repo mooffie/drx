@@ -1,5 +1,14 @@
 #include "ruby.h"
-#include "st.h"
+
+#ifndef RUBY_VM
+# define RUBY_1_8
+#endif
+
+#ifdef RUBY_1_8
+# include "st.h"
+#else
+# include "ruby/st.h"
+#endif
 
 /**
  * Gets the Ruby's engine type of a variable.
@@ -10,11 +19,9 @@ static VALUE t_get_type(VALUE self, VALUE obj)
 }
 
 // Helper for t_get_iv_tbl().
-int record_var(st_data_t key, st_data_t value, VALUE hash) {
-  // I originally did the following, but it breaks for object::Tk*. Perhaps these
-  // values are T_NODEs? (e.g. aliases) @todo: debug using INT2FIX(TYPE(value)).
-  rb_hash_aset(hash, ID2SYM(key), value);
-  // So...
+static int record_var(st_data_t key, st_data_t value, VALUE hash) {
+  // We don't put the 'value' in the hash because it may not be a Ruby
+  // conventional value but a NODE (and acidentally printing it may crash ruby).
   rb_hash_aset(hash, ID2SYM(key), Qtrue);
   return ST_CONTINUE;
 }
@@ -31,9 +38,13 @@ static VALUE t_get_iv_tbl(VALUE self, VALUE obj)
     rb_raise(rb_eTypeError, "Only T_OBJECT/T_CLASS/T_MODULE is expected as the argument (got %d)", TYPE(obj));
   }
 
+#ifdef RUBY_1_8
   if (ROBJECT(obj)->iv_tbl) {
     st_foreach(ROBJECT(obj)->iv_tbl, record_var, (st_data_t)hash);
   }
+#else
+  rb_ivar_foreach(obj, record_var, hash);
+#endif
 
   return hash;
 }
@@ -58,11 +69,10 @@ static VALUE t_get_ivar(VALUE self, VALUE obj, VALUE var_name)
  */
 static VALUE t_get_super(VALUE self, VALUE obj)
 {
-  VALUE super;
   if (TYPE(obj) != T_CLASS && TYPE(obj) != T_ICLASS && TYPE(obj) != T_MODULE) {
     rb_raise(rb_eTypeError, "Only T_CLASS/T_MODULE is expected as the argument (got %d)", TYPE(obj));
   }
-  return RCLASS(obj)->super ? RCLASS(obj)->super : Qnil;
+  return RCLASS_SUPER(obj) ? RCLASS_SUPER(obj) : Qnil;
 }
 
 /**
@@ -85,9 +95,13 @@ static VALUE t_get_flags(VALUE self, VALUE obj)
 }
 
 // Helper for t_get_m_tbl().
-int record_method(st_data_t key, st_data_t value, VALUE hash) {
-  // @todo: Store something useful in the values?
-  rb_hash_aset(hash, key == ID_ALLOCATOR ? rb_str_new2("<Allocator>") : ID2SYM(key), INT2FIX(666));
+// @todo: Store something useful in the values?
+static int record_method(st_data_t key, st_data_t value, VALUE hash) {
+  static ID id_allocator_symb = 0;
+  if (!id_allocator_symb) {
+    id_allocator_symb = rb_intern("<Allocator>");
+  }
+  rb_hash_aset(hash, ID2SYM(key == ID_ALLOCATOR ? id_allocator_symb : key), Qtrue);
   return ST_CONTINUE;
 }
 
@@ -118,6 +132,7 @@ static VALUE t_get_address(VALUE self, VALUE obj)
   return INT2NUM(obj);
 }
 
+#ifdef RUBY_1_8
 // {{{ Locating methods
 
 #include "node.h"
@@ -126,7 +141,7 @@ static VALUE t_get_address(VALUE self, VALUE obj)
 
 static VALUE t_do_locate_method(NODE *ND_method) {
   NODE *ND_scope = NULL, *ND_block = NULL;
-  VALUE place;
+  VALUE location;
   char line_s[20];
 
   //
@@ -195,23 +210,24 @@ static VALUE t_do_locate_method(NODE *ND_method) {
     return RSTR("<I'm expecting a NODE_BLOCK here...>");
   }
 
-  sprintf(line_s, "%d:", nd_line(ND_block));
-  place = RSTR(line_s);
-  rb_str_cat2(place, ND_block->nd_file);
+  location = rb_ary_new();
+  rb_ary_push(location, RSTR(ND_block->nd_file));
+  rb_ary_push(location, INT2FIX(nd_line(ND_block)));
 
-  return place;
+  return location;
 }
 
 /*
  *  call-seq:
- *     Drx::Core::locate_method(Date, "to_s")  => str
+ *     Drx::Core::locate_method(Date, "to_s")  => ...
  *
- *  Locates the filename and line-number where a method was defined. Returns a
- *  string of the form "89:/path/to/file.rb", or nil if the method doesn't exist,
- *  or a string of the form "<identifier>".
+ *  Locates the filename and line-number where a method was defined.
  *
- *  If the method exists but isn't a Ruby method (e.g., if it's written in C),
- *  an <identifier> string is returned. E.g., <c>, <alias>, <attr reader>.
+ *  Returns one of:
+ *   - [ "/path/to/file.rb", 89 ]
+ *   - A string of the form "<identifier>" if the method isn't written
+ *     in Ruby. Possibilities are <c>, <alias>, <attr reader>, and more.
+ *   - raises NameError if the method doesn't exist.
  */
 static VALUE t_locate_method(VALUE self, VALUE obj, VALUE method_name)
 {
@@ -221,19 +237,17 @@ static VALUE t_locate_method(VALUE self, VALUE obj, VALUE method_name)
   if (TYPE(obj) != T_CLASS && TYPE(obj) != T_ICLASS && TYPE(obj) != T_MODULE) {
     rb_raise(rb_eTypeError, "Only T_CLASS/T_MODULE is expected as the argument (got %d)", TYPE(obj));
   }
-  if (!RCLASS(obj)->m_tbl) {
-    return Qnil;
-  }
   c_name = StringValuePtr(method_name);
   ID id = rb_intern(c_name);
-  if (st_lookup(RCLASS(obj)->m_tbl, id, (st_data_t *)&method_node))  {
+  if (RCLASS(obj)->m_tbl && st_lookup(RCLASS(obj)->m_tbl, id, (st_data_t *)&method_node))  {
     return t_do_locate_method(method_node);
   } else {
-    return Qnil;
+    rb_raise(rb_eNameError, "method not found");
   }
 }
 
 // }}}
+#endif // RUBY_1_8
 
 VALUE mDrx;
 VALUE mCore;
@@ -249,18 +263,19 @@ void Init_drx_core() {
   rb_define_module_function(mCore, "get_address", t_get_address, 1);
   rb_define_module_function(mCore, "get_type", t_get_type, 1);
   rb_define_module_function(mCore, "get_ivar", t_get_ivar, 2);
+#ifdef RUBY_1_8
   rb_define_module_function(mCore, "locate_method", t_locate_method, 2);
+  // For the following, see explanation in t_do_locate_method().
+  rb_eval_string("\
+    class ::Proc;\
+      def _location;\
+        if to_s =~ /@(.*?):(\\d+)>$/ then [$1, $2.to_i] end;\
+      end;\
+    end");
+#endif
   rb_define_const(mCore, "FL_SINGLETON", INT2FIX(FL_SINGLETON));
   rb_define_const(mCore, "T_OBJECT", INT2FIX(T_OBJECT));
   rb_define_const(mCore, "T_CLASS", INT2FIX(T_CLASS));
   rb_define_const(mCore, "T_ICLASS", INT2FIX(T_ICLASS));
   rb_define_const(mCore, "T_MODULE", INT2FIX(T_MODULE));
-
-  // For the following, see explanation in t_do_locate_method().
-  rb_eval_string("\
-    class ::Proc;\
-      def _location;\
-        if to_s =~ /@(.*?):(\\d+)>$/ then \"#$2:#$1\" end;\
-      end;\
-    end");
 }

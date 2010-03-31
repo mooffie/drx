@@ -105,7 +105,7 @@ module Drx
         }
         @methodsbox.bind('Double-Button-1') {
           if @methodsbox.has_selection?
-            locate_method(current_object, @methodsbox.get_selection)
+            edit(current_object, @methodsbox.get_selection)
           end
         }
         @eval_entry.bind('Key-Return') {
@@ -229,15 +229,15 @@ module Drx
         end
       end
 
-      def locate_method(obj, method_name)
-        place = ObjInfo.new(obj).locate_method(method_name)
-        if !place
+      def edit(obj, method_name)
+        location = ObjInfo.new(obj).locate_method(method_name) rescue nil
+        if !location
           output "Method #{method_name} doesn't exist\n", 'info'
         else
-          if place =~ /\A(\d+):(.*)/
-            open_up_editor($2, $1)
+          if location.is_a? String
+            output "Can't locate method, because it's a: #{location}\n", 'info'
           else
-            output "Can't locate method, because it's a: #{place}\n", 'info'
+            open_up_editor(location[0], location[1])
           end
         end
       end
@@ -301,6 +301,26 @@ module Drx
         end
       end
 
+      # Returns a terse method location, for use in GUIs.
+      def pretty_location(info, method)
+        location = begin
+                     info.locate_method(method)
+                   rescue NameError
+                     if method != '<Allocator>'
+                       # Since we're using the GUI, the method has to exist. The
+                       # only possibility here is that it's an undef'ed method entry.
+                       '<undef>'
+                     end
+                   end
+        if location.nil?
+          ''
+        elsif location.is_a? String
+          location
+        else
+          File.basename location[0]
+        end
+      end
+
       # Fills the methods listbox with a list of the object's methods.
       def display_methods(obj)
         @methodsbox.clear
@@ -308,7 +328,7 @@ module Drx
         if obj and info.class_like?
           methods = info.m_tbl.keys.map do |v| v.to_s end.sort
           methods.each do |name|
-            @methodsbox.insert('', 'end', :text => name, :values => [ name, File.basename(String(info.locate_method(name))) ] )
+            @methodsbox.insert('', 'end', :text => name, :values => [ name, pretty_location(info, name) ] )
           end
         end
       end

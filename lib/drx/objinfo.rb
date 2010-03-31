@@ -35,8 +35,29 @@ module Drx
     end
 
     # Returns the source-code position where a method is defined.
+    #
+    # Returns one of:
+    #  - [ 'file.rb', 12 ]
+    #  - "<c>", "<undef>", "<alias>", etc., if not a ruby code (for Ruby 1.9,
+    #    returns only "<c>").
+    #  - nil, if functionality not implemented.
+    #  - raises NameError if method not found.
     def locate_method(method_name)
-      Core::locate_method(@obj, method_name)
+      if Core.respond_to? :locate_method
+        # Ruby 1.8
+        Core::locate_method(@obj, method_name)
+      elsif Method.method_defined? :source_location
+        # Ruby 1.9
+        location = @obj.instance_method(method_name).source_location
+        if location
+          location
+        else
+          '<c>'
+        end
+      else
+        # Some version of ruby that doesn't have Method#source_loction
+        nil
+      end
     end
 
     def has_iv_tbl?

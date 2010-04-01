@@ -1,4 +1,4 @@
-# Adds Graphviz diagraming capability to ObjInfo
+# Adds Graphviz diagramming capability to ObjInfo
 
 module Drx
 
@@ -38,16 +38,19 @@ module Drx
     # Create an ID for the DOT node representing this object.
     def dot_id
        ('o' + address.to_s).sub('-', '_')
+       # Tip: when examining the DOT output you may wish to
+       # uncomment the following line. It will show you which
+       # ruby object the DOT node represents.
+       #('o' + address.to_s).sub('-', '_') + " /* #{repr} */ "
     end
 
     # Creates a pseudo URL for the HTML imagemap.
     def dot_url
-      "http://server/obj/#{dot_id}"
+      "http://ruby/object/#{dot_id}"
     end
 
     # Quotes a string to be used in DOT source.
     def dot_quote(s)
-      # @todo: find the documentation for tr()?
       '"' + s.gsub('\\') { '\\\\' }.gsub('"', '\\"').gsub("\n", '\\n') + '"'
     end
 
@@ -113,7 +116,7 @@ module Drx
 
     def dot_source(level = 0, opts = {}, &block) # :yield:
       out = ''
-      # Note: since 'obj' may be a T_ICLASS, it doesn't repond to many methods,
+      # Note: since 'obj' may be a T_ICLASS, it doesn't respond to many methods,
       # including is_a?. So when we're querying things we're using Drx calls
       # instead.
 
@@ -151,7 +154,17 @@ module Drx
       kls = effective_klass
       if display_klass?(kls)
         out << kls.dot_source(level+1, opts, &block)
-        out << "#{dot_id} -> #{kls.dot_id} [style=dotted];" "\n"
+        # Recall that in Ruby there are two main inheritance groups: the class
+        # inheritance and the singleton inheritance.
+        #
+        # When an ICLASS has a singleton, we want this singleton to appear close
+        # to the ICLASS, because we want to keep the two groups visually distinct.
+        # We do this by setting the arrow's weight to 1.0.
+        #
+        # (To see the effect of this, set the weight unconditionally to '0' and
+        # see the graph for DataMapper.)
+        weight = t_iclass? ? 1 : 0
+        out << "#{dot_id} -> #{kls.dot_id} [style=dotted, weight=#{weight}];" "\n"
         out << "{ rank=same; #{dot_id}; #{kls.dot_id}; }" "\n"
       end
 
@@ -167,12 +180,12 @@ module Drx
       if t_iclass?
         # We're interested in an ICLASS's klass only if it isn't Module.
         #
-        # Usualy this means that the ICLASS has a singleton (see "Singletons
+        # Usually this means that the ICLASS has a singleton (see "Singletons
         # of included modules" in display_super?()). We want to see this
         # singleton.
         return Module != kls.the_object
       else
-        # Displaying a singletone's klass is confusing and usually unneeded.
+        # Displaying a singleton's klass is confusing and usually unneeded.
         return !singleton?
       end
     end

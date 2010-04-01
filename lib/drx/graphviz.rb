@@ -114,17 +114,25 @@ module Drx
       end
     end
 
-    def dot_source(level = 0, opts = {}, &block) # :yield:
+    # Builds the DOT source for the diagram. if you're only interested
+    # in the output image, use generate_diagram() instead.
+    def dot_source(opts = {}, &block) # :yield:
+      opts = opts.dup
+      opts[:base] = self
+      @@seen = {}
+
+      out = 'digraph {' "\n"
+      out << @@sizes[opts[:size] || '100%']
+      out << dot_fragment(opts, &block)
+      out << '}' "\n"
+      out
+    end
+
+    def dot_fragment(opts = {}, &block) # :yield:
       out = ''
       # Note: since 'obj' may be a T_ICLASS, it doesn't respond to many methods,
       # including is_a?. So when we're querying things we're using Drx calls
       # instead.
-
-      if level.zero?
-        out << 'digraph {' "\n"
-        out << @@sizes[opts[:size] || '100%']
-        @@seen = {}
-      end
 
       seen = @@seen[address]
       @@seen[address] = true
@@ -140,8 +148,8 @@ module Drx
 
       if class_like?
         if spr = self.super and display_super?(spr)
-          out << spr.dot_source(level+1, opts, &block)
-          if [Module, ObjInfo.new(Module).klass.the_object].include? the_object
+          out << spr.dot_fragment(opts, &block)
+          if insignificant_super_arrow?(opts)
             # We don't want these relatively insignificant lines to clutter the display,
             # so we paint them lightly and tell DOT they aren't to affect the layout (width=0).
             out << "#{dot_id} -> #{spr.dot_id} [color=gray85, weight=0];" "\n"
@@ -153,7 +161,7 @@ module Drx
 
       kls = effective_klass
       if display_klass?(kls)
-        out << kls.dot_source(level+1, opts, &block)
+        out << kls.dot_fragment(opts, &block)
         # Recall that in Ruby there are two main inheritance groups: the class
         # inheritance and the singleton inheritance.
         #
@@ -168,11 +176,23 @@ module Drx
         out << "{ rank=same; #{dot_id}; #{kls.dot_id}; }" "\n"
       end
 
-      if level.zero?
-        out << '}' "\n"
-      end
+      out
+    end
 
-      return out
+    # Whether the 'super' arrow is infignificant and must not affect the DOT
+    # layout
+    #
+    # A Ruby object graph is cyclic. We don't want to feed DOT a cyclic graph
+    # because it will ruin our nice "rectangular" layout. The purpose of the
+    # following method is to break the cycle. Normally we break the cycle at
+    # Module (and its singleton). When the user is examining a module, we
+    # instead break the cycle at Class (and its singleton).
+    def insignificant_super_arrow?(opts)
+      if opts[:base].t_module?
+        [Class, ObjInfo.new(Class).klass.the_object].include? the_object
+      else
+        [Module, ObjInfo.new(Module).klass.the_object].include? the_object
+      end
     end
 
     # Whether to display the klass.
@@ -228,7 +248,7 @@ module Drx
     #   end
     #
     def generate_diagram(files, opts = {}, &block)
-      source = self.dot_source(0, opts, &block)
+      source = self.dot_source(opts, &block)
       File.open(files['dot'], 'w') { |f| f.write(source) }
       command = GRAPHVIZ_COMMAND % [files['dot'], files['gif'], files['map']]
       message = Kernel.`(command)  # `

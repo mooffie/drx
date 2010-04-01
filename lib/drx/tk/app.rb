@@ -74,7 +74,7 @@ module Drx
         }
         @methodsbox.bind('Double-Button-1') {
           if @methodsbox.has_selection?
-            locate_method(current_object, @methodsbox.get_selection)
+            edit(current_object, @methodsbox.get_selection)
           end
         }
         @eval_entry.bind('Key-Return') {
@@ -160,15 +160,15 @@ module Drx
         end
       end
 
-      def locate_method(obj, method_name)
-        place = ObjInfo.new(obj).locate_method(method_name)
-        if !place
+      def edit(obj, method_name)
+        location = ObjInfo.new(obj).locate_method(method_name) rescue nil
+        if !location
           output "Method #{method_name} doesn't exist\n", 'info'
         else
-          if place =~ /\A(\d+):(.*)/
-            open_up_editor($2, $1)
+          if location.is_a? String
+            output "Can't locate method, because it's a: #{location}\n", 'info'
           else
-            output "Can't locate method, because: #{place}\n", 'info'
+            open_up_editor(location[0], location[1])
           end
         end
       end

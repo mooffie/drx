@@ -9,7 +9,7 @@ spec = Gem::Specification.new do |s|
   s.rubyforge_project = 'drx'
   s.homepage      = 'http://drx.rubyforge.org/'
   s.summary       = "Inspect Ruby objects."
-  s.required_ruby_version = '~> 1.8.0'
+  s.required_ruby_version = '>= 1.8.2'
 
   candidates = ['README'] + Dir.glob("{bin,docs,lib,ext,tests,examples}/**/*")
   s.files = candidates.delete_if { |f| f =~ /(~|Makefile|\.o|\.so)$/ }

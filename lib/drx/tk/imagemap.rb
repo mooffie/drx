@@ -187,7 +187,9 @@ module TkImageMap
     # DOT outputs oval elements as polygons with many many sides. Since Tk doesn't
     # draw them well, we convert such polygons to ovals.
     def self.to_oval(coords)
-      points = coords.enum_slice(2).to_a
+      require 'enumerator'
+      #points = coords.each_slice(2).to_a # Doesn't work for older 1.8's.
+      points = coords.enum_for(:each_slice, 2).to_a
       if points.size < 10
         # If there are few sides, we assume it's a real polygon.
         return nil

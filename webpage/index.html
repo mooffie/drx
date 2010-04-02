@@ -66,17 +66,13 @@ s.see
 <h2>Requirements</h2>
 
 <ol>
-<li>MRI Ruby 1.8 (Code wasn't yet ported to Ruby 1.9).
-  <div class="further">
-    <p>2010-April-01: The lastest version in the Git repository is already compatible with Ruby 1.9. A gem will be released soon.</p>
-  </div>
-  </li>
+<li>MRI Ruby 1.8 or 1.9.</li>
 <li>Ability to compile Ruby C extensions (Because DrX has some part written in C).</li>
 <li>The Tk user interface toolkit.
   <div class="further">
     <p>You can use either the "new" Tk (version 8.5), or the "old" one (version 8.4).</p>
     <p>However, if you use the "old" one, you must also have the Tile extension installed.
-    For example, on Ubuntu do <code>sudo apt-get install tk-tile</code>. As a very last
+    For example, on Ubuntu do <code>sudo apt-get install tk-tile</code>. Alternatively, as a very last
     resort, use an old version of DrX which doesn't necessitates Tile
     (that's any version earlier than 0.4).</p>
   </div>
@@ -85,11 +81,14 @@ s.see
   <div class="further">
     <p>If the graphs DrX produces have ragged lines, it means your GraphViz doesn't have
     anti-aliasing support. A quick way to solve this on Ubuntu is by doing
-    <code>sudo apt-get install graphviz-cairo</code>.
-    </p>
+    <code>sudo apt-get install graphviz-cairo</code>.</p>
+    <p>Make sure GraphViz' 'bin' folder is in your $PATH.</p>
   </div>
   </li>
 </ol>
+
+<p>(A note to MS-Windows users: DrX was installed sucessfully under: RubyInstaller + DevKit; Tk
+from ActiveState and bindings via <a href="http://github.com/rdp/tk_as_gem">tk_as_gem</a>.)</p>
 
 <h2>The object graph</h2>
 

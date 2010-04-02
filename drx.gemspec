@@ -2,13 +2,13 @@ require 'rubygems'
 
 spec = Gem::Specification.new do |s|
   s.name          = 'drx'
-  s.version       = '0.3.1'
+  s.version       = '0.3.2'
   s.author        = 'Mooffie'
   s.email         = 'mooffie@gmail.com'
   s.platform      = Gem::Platform::RUBY
   s.rubyforge_project = 'drx'
   s.homepage      = 'http://drx.rubyforge.org/'
-  s.summary       = "Inspect Ruby objects."
+  s.summary       = 'Object inspector for Ruby.'
   s.required_ruby_version = '>= 1.8.2'
 
   candidates = ['README'] + Dir.glob("{bin,docs,lib,ext,tests,examples}/**/*")

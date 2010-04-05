@@ -56,10 +56,12 @@ module Drx
           show 'headings'
         }
         @methodsbox = Tk::Tile::Treeview.new(toplevel) {
-          columns 'name location'
+          columns 'name arguments location'
           heading_configure('name', :text => 'Name')
+          heading_configure('arguments', :text => 'Arguments')
           heading_configure('location', :text => 'Location')
           column_configure('name', :stretch => false )
+          column_configure('arguments', :stretch => false )
           column_configure('location', :stretch => false )
           show 'headings'
         }
@@ -81,6 +83,15 @@ module Drx
         }
         @save_btn.command {
           save_graph tip
+        }
+
+        @arguments_chk = TkCheckbutton.new(toplevel) {
+          text 'Show arguments'
+          variable TkVariable.new(1)
+        }
+        @rubyparser_chk = TkCheckbutton.new(toplevel) {
+          text 'Use RubyParser (slow)'
+          variable TkVariable.new(0)
         }
 
         layout
@@ -140,6 +151,24 @@ module Drx
         @graph_style_menu.bind('<ComboboxSelected>') {
           @graph_opts[:style] = @graph_style_menu.get
           refresh
+        }
+        @arguments_chk.command {
+          if show_arguments?
+            @rubyparser_chk.raise
+            @methodsbox.displaycolumns 'name arguments location'
+            display_methods(current_object)
+          else
+            @rubyparser_chk.lower
+            @methodsbox.displaycolumns 'name location'
+          end
+        }
+        @rubyparser_chk.command {
+          if @rubyparser_chk.variable.value == '1'
+            ObjInfo.use_rubyparser = true
+          else
+            ObjInfo.use_rubyparser = false
+          end
+          display_methods(current_object)
         }
 
         output "Please visit the homepage, http://drx.rubyforge.org/, for usage instructions.\n", 'info'
@@ -204,7 +233,8 @@ module Drx
         ), :weight => 50
         panes.add vbox(
           TkLabel.new(toplevel, :text => 'Methods (m_tbl):', :anchor => 'w'),
-          [Scrolled.new(toplevel, @methodsbox), { :expand => true, :fill => 'both' } ]
+          [Scrolled.new(toplevel, @methodsbox), { :expand => true, :fill => 'both' } ],
+          hbox(@arguments_chk, separator, @rubyparser_chk)
         ), :weight => 10
 
         main_frame.add(panes)
@@ -321,6 +351,26 @@ module Drx
         end
       end
 
+      def pretty_arguments(info, name)
+        args = info.method_arguments(name)
+        return args.map do |arg|
+          case arg[0]
+          when :req;   (arg[1] || 'arg').to_s
+          when :opt;   (arg[1] || 'arg').to_s + '=' + (arg[2] || '?')
+          when :rest;  '*' + (arg[1] || 'args').to_s
+          when :block; '&' + (arg[1] || 'arg').to_s
+          end
+        end.join ', '
+      rescue NameError
+        return '---'
+      rescue SyntaxError => e
+        'SYNTAX ERROR: ' + e.to_s
+      end
+
+      def show_arguments?
+        @arguments_chk.variable.value == '1'
+      end
+
       # Fills the methods listbox with a list of the object's methods.
       def display_methods(obj)
         @methodsbox.clear
@@ -328,7 +378,11 @@ module Drx
         if obj and info.class_like?
           methods = info.m_tbl.keys.map do |v| v.to_s end.sort
           methods.each do |name|
-            @methodsbox.insert('', 'end', :text => name, :values => [ name, pretty_location(info, name) ] )
+            @methodsbox.insert('', 'end', :text => name, :values => [
+              name,
+              show_arguments? ? pretty_arguments(info, name) : '-',
+              pretty_location(info, name)
+            ])
           end
         end
       end

@@ -19,6 +19,10 @@ module Drx
       Core::get_address(@obj)
     end
 
+    def ==(other)
+      other.is_a?(ObjInfo) and address == other.address
+    end
+
     def the_object
       @obj
     end

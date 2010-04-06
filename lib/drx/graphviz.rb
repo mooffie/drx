@@ -128,7 +128,7 @@ module Drx
       out
     end
 
-    def dot_fragment(opts = {}, &block) # :yield:
+    def dot_fragment(opts = {}, ancestors = [], &block) # :yield:
       out = ''
       # Note: since 'obj' may be a T_ICLASS, it doesn't respond to many methods,
       # including is_a?. So when we're querying things we're using Drx calls
@@ -147,9 +147,9 @@ module Drx
       return '' if seen
 
       if class_like?
-        if spr = self.super and display_super?(spr)
-          out << spr.dot_fragment(opts, &block)
-          if insignificant_super_arrow?(opts)
+        if spr = self.super and display_super?(spr, ancestors)
+          out << spr.dot_fragment(opts, ancestors + [self], &block)
+          if insignificant_super_arrow?(opts, ancestors)
             # We don't want these relatively insignificant lines to clutter the display,
             # so we paint them lightly and tell DOT they aren't to affect the layout (width=0).
             out << "#{dot_id} -> #{spr.dot_id} [color=gray85, weight=0];" "\n"
@@ -172,6 +172,12 @@ module Drx
         # (To see the effect of this, set the weight unconditionally to '0' and
         # see the graph for DataMapper.)
         weight = t_iclass? ? 1 : 0
+
+        # However, here's a special case. DOT seems to have a bug: it sometimes
+        # doesn't draw the arrows going out of Class and Module (to their
+        # singletons). Making their weight 1 makes DOT draw them.
+        weight = 1 if self == _Class or self == _Module
+
         out << "#{dot_id} -> #{kls.dot_id} [style=dotted, weight=#{weight}];" "\n"
         out << "{ rank=same; #{dot_id}; #{kls.dot_id}; }" "\n"
       end
@@ -187,11 +193,13 @@ module Drx
     # following method is to break the cycle. Normally we break the cycle at
     # Module (and its singleton). When the user is examining a module, we
     # instead break the cycle at Class (and its singleton).
-    def insignificant_super_arrow?(opts)
+    def insignificant_super_arrow?(opts, my_ancestors)
       if opts[:base].t_module?
-        [Class, ObjInfo.new(Class).klass.the_object].include? the_object
+        self == _ClassS or
+          (self.super == _Module and (my_ancestors + [self]).include? _Class)
       else
-        [Module, ObjInfo.new(Module).klass.the_object].include? the_object
+        self == _ModuleS or
+          (self.super == _Object and (my_ancestors + [self]).include? _Module)
       end
     end
 
@@ -203,7 +211,17 @@ module Drx
         # Usually this means that the ICLASS has a singleton (see "Singletons
         # of included modules" in display_super?()). We want to see this
         # singleton.
-        return Module != kls.the_object
+
+        # Unfortunately, here is a special treatment for the 'arguments' gem,
+        # which our GUI uses. That gem includes the 'Arguments' module in both
+        # Class and Module (this is redundant!) and having the singleton twice
+        # in our graph may break its nice rectangular structure. So we don't
+        # show its singleton.
+        if defined? ::Arguments
+           return false if ::Arguments == klass.the_object
+        end
+
+        return kls != _Module
       else
         # Displaying a singleton's klass is confusing and usually unneeded.
         return !singleton?
@@ -211,16 +229,19 @@ module Drx
     end
 
     # Whether to display the super.
-    def display_super?(spr)
-      if (singleton? or t_iclass?) and Module == spr.the_object
-         # Singletons of included modules, and modules included in them,
-         # have their chain eventually reach Module. To prevent clutter,
-         # we don't show this final link.
-         #
-         # "Singletons of included modules" often exist only for their
-         # #included method. For example, DataMapper#Resource have
-         # such a singleton.
-        return false
+    def display_super?(spr, my_ancestors)
+      if spr == _Module
+        # Many objects have Module as their super (e.g., singletones
+        # of included modules, or modules included in them). To prevent
+        # clutter we print the arrow to Module only if it comes from
+        # Class (or a module included in it).
+        return (my_ancestors + [self]).include? _Class
+        #
+        # A somewhat irrelevant note (I don't have a better place to put it):
+        #
+        # "Singletons of included modules" often exist solely for their
+        # #included method. For example, DataMapper#Resource has
+        # such a singleton.
       end
       return true
     end
@@ -236,6 +257,17 @@ module Drx
         klass
       end
     end
+
+    # Shortcuts for some specific objects. An "S" suffix
+    # denotes a singleton.
+    protected
+    def _Module; ObjInfo.new(Module); end
+    def _ModuleS; ObjInfo.new(Module).klass; end
+    def _Object; ObjInfo.new(Object); end
+    def _ObjectS; ObjInfo.new(Object).klass; end
+    def _Class; ObjInfo.new(Class); end
+    def _ClassS; ObjInfo.new(Class).klass; end
+    public
 
     # Generates a diagram of the inheritance hierarchy. It accepts a hash
     # pointing to pathnames to write the result to. A Tempfiles hash

@@ -64,6 +64,8 @@ module Drx
           column_configure('arguments', :stretch => false )
           column_configure('location', :stretch => false )
           show 'headings'
+          # We want the layout manager to allocate space for two columns only:
+          displaycolumns 'name location'
         }
 
         @graph_size_menu = Tk::Tile::Combobox.new(toplevel) {
@@ -87,7 +89,7 @@ module Drx
 
         @arguments_chk = TkCheckbutton.new(toplevel) {
           text 'Show arguments'
-          variable TkVariable.new(1)
+          variable TkVariable.new(0)
         }
         @rubyparser_chk = TkCheckbutton.new(toplevel) {
           text 'Use RubyParser (slow)'
@@ -152,8 +154,8 @@ module Drx
           @graph_opts[:style] = @graph_style_menu.get
           refresh
         }
-        @arguments_chk.command {
-          if show_arguments?
+        @arguments_chk.variable.trace('w') do |value|
+          if value == 1
             @rubyparser_chk.raise
             @methodsbox.displaycolumns 'name arguments location'
             display_methods(current_object)
@@ -161,15 +163,12 @@ module Drx
             @rubyparser_chk.lower
             @methodsbox.displaycolumns 'name location'
           end
-        }
-        @rubyparser_chk.command {
-          if @rubyparser_chk.variable.value == '1'
-            ObjInfo.use_rubyparser = true
-          else
-            ObjInfo.use_rubyparser = false
-          end
+        end
+        @rubyparser_chk.variable.trace('w') do |value|
+          ObjInfo.use_rubyparser = (value == 1)
           display_methods(current_object)
-        }
+        end
+        @arguments_chk.variable.value = @arguments_chk.variable.value # Trigger the trace handler.
 
         output "Please visit the homepage, http://drx.rubyforge.org/, for usage instructions.\n", 'info'
 
@@ -368,7 +367,7 @@ module Drx
       end
 
       def show_arguments?
-        @arguments_chk.variable.value == '1'
+        @arguments_chk.variable == 1
       end
 
       # Fills the methods listbox with a list of the object's methods.

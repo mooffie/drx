@@ -154,7 +154,7 @@ module Drx
           @graph_opts[:style] = @graph_style_menu.get
           refresh
         }
-        @arguments_chk.variable.trace('w') do |value|
+        @arguments_chk.variable.trace('w') do |value,|
           if value == 1
             @rubyparser_chk.raise
             @methodsbox.displaycolumns 'name arguments location'
@@ -164,7 +164,7 @@ module Drx
             @methodsbox.displaycolumns 'name location'
           end
         end
-        @rubyparser_chk.variable.trace('w') do |value|
+        @rubyparser_chk.variable.trace('w') do |value,|
           ObjInfo.use_rubyparser = (value == 1)
           display_methods(current_object)
         end

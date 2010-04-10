@@ -20,15 +20,21 @@ module Drx
     end
 
     # Strategy: use RubyParser, via the 'arguments' gem.
+    #
     # pros: shows default values; works for 1.8 too.
     # cons: very slow.
     def _method_arguments__by_rubyparser(method_name)
       @@once__rubyparser ||= begin
-        require 'arguments' rescue nil
+        begin
+          require 'arguments'
+        rescue LoadError
+          # Not installed.
+        end
         1
       end
       return nil if not defined? Arguments
       args = Arguments.names(the_object, method_name, false)
+      # Convert this to a Ruby 1.9.2 format:
       return args.map do |arg|
         if arg.size == 2
           [:opt, arg[0], arg[1]]
@@ -42,18 +48,25 @@ module Drx
         end
       end
     rescue SyntaxError => e
+      # We could just return nil here, to continue to the next strategy,
+      # but we want to inform the user of the suckiness of RubyParser.
       raise
     rescue Exception
       nil
     end
 
-    # Strategy: use Method#parameter (for ruby 1.9 only).
+    # Strategy: use Method#parameters (for ruby 1.9 only).
+    #
     # pros: fast.
     # cons: doesn't show default values.
     def _method_arguments__by_methopara(method_name)
       @@once__methopara ||= begin
         # For ruby 1.9.0 and 1.9.1, we need to use a gem.
-        require 'methopara' rescue nil
+        begin
+          require 'methopara'
+        rescue LoadError
+          # Not installed.
+        end
         1
       end
       method = the_object.instance_method(method_name)
@@ -62,11 +75,12 @@ module Drx
       end
     rescue NotImplementedError
       # For some methods #parameters raises an exception. We return nil
-      # to move on to the next scheme.
+      # to move on to the next strategy.
       return nil
     end
 
     # Strategy: simulation via Method#arity.
+    #
     # pros: fast; work without any gems.
     # cons: doesn't show argument names.
     def _method_arguments__by_arity(method_name)

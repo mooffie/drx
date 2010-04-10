@@ -90,6 +90,13 @@ s.see
 <p>(A note to MS-Windows users: DrX was installed sucessfully under: RubyInstaller + DevKit; Tk
 from ActiveState and bindings via <a href="http://github.com/rdp/tk_as_gem">tk_as_gem</a>.)</p>
 
+<h2>Recommendations</h2>
+
+<p>DrX <a href="#arguments">can show you the arguments</a> methods expect. While this is not
+needed, DrX can work more effectively if you install the "arguments"
+and/or the "methodpara" gems. In short, do <code>gem install
+rdp-arguments</code> and <code>gem install methopara</code>.</p>
+
 <h2>The object graph</h2>
 
 <p>The object graph shows the object model. Ruby objects have two "pointers":</p>
@@ -356,7 +363,34 @@ end
 Drx::TkGUI::EDITOR_COMMAND.replace('gvim +%d "%s"')
 </pre>
 
+<h2 id="arguments">Method arguments</h2>
+
+<p>When you check the "Show arguments" checkbox, DrX shows the arguments
+the methods expect. DrX uses three different strategies to detect these arguments:</p>
+
+<dl>
+
+<dt>"methopara"</dt>
+<dd>On Ruby 1.9.2, or (for earlier 1.9 Rubies) where the "methopara" gem
+is installed, there's <code>Mathod#paramaters</code> to tell us about
+the arguments.</dd>
+
+<dt>RubyParser</dt>
+<dd>On Ruby 1.8 and 1.9, if the "arguments" gem is installed, DrX can use
+it to detect the arguments. In turn, that gem uses the RubyParser gem.</dd>
+
+<dt>arity</dt>
+<dd>If none of the above is available, DrX uses the arity of a method to
+simulate its arguments. For example, if the arity is 2, the arguments reported
+will be "arg, arg"; if the arity is -2, then "arg, *args" will be
+reported. This strategy is the fallback in case any of the other ones fail.</dd>
+
+</dl>
+
+<p>The RubyParser strategy is slow, so it's only used it you explicitly
+check the "Use RubyParser" checkbox.</p>
+
 <h2>Reporting bugs</h2>
 
-<p>Please file bug reports and support requests at the GitHub <a
+<p>Please file bug reports and support requests at the <a
 href="http://github.com/mooffie/drx/issues">issue queue</a>.</p>

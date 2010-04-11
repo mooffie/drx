@@ -318,14 +318,20 @@ module Drx
           # Get rid of gazillions of Tk classes:
           vars = vars.reject { |v| v =~ /Tk|Ttk/ }
           vars.each do |name|
-            value = if allowed_names.any? { |p| p === name }
-                      info.__get_ivar(name).inspect
-                    else
-                      # We don't want to inspect ruby's internal variables (because
-                      # they may not be Ruby values at all).
-                      ''
-                    end
-            @varsbox.insert('', 'end', :text => name, :values => [ name, value ] )
+            begin
+              value = if allowed_names.any? { |p| p === name }
+                        info.__get_ivar(name).inspect
+                      else
+                        # We don't want to inspect ruby's internal variables (because
+                        # they may not be Ruby values at all).
+                        ''
+                      end
+              @varsbox.insert('', 'end', :text => name, :values => [ name, value ] )
+            rescue NameError
+              # Referencing an autoloaded constant (in ObjInfo#get_ivar()) may
+              # raise a NameError. This happens when the source file autoloaded
+              # defines the moudle/class in the top-level. Example is Camping::Mab.
+            end
           end
         end
       end

@@ -279,7 +279,7 @@ module Drx
       end
 
       def selected_var
-        ObjInfo.new(current_object).__get_ivar(@varsbox.get_selection)
+        ObjInfo.new(current_object).get_ivar(@varsbox.get_selection)
       end
 
       def eval_code(code)
@@ -320,7 +320,7 @@ module Drx
           vars.each do |name|
             begin
               value = if allowed_names.any? { |p| p === name }
-                        info.__get_ivar(name).inspect
+                        info.get_ivar(name).inspect
                       else
                         # We don't want to inspect ruby's internal variables (because
                         # they may not be Ruby values at all).

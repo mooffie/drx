@@ -74,8 +74,9 @@ module Drx
       Core::get_iv_tbl(@obj)
     end
 
-    # @todo: this could be nicer. perhaps define an [] accessor.
-    def __get_ivar(name)
+    # Returns the value of an instance variable. Actually, of any sort
+    # of variable that's recorded in the variable-table.
+    def get_ivar(name)
       if class_like? and name.to_s =~ /^[A-Z]/
         # If it's a constant, it may be 'autoloaded'. We
         # trigger the loading by calling const_get().
@@ -124,7 +125,7 @@ module Drx
       if t_iclass?
         'include ' + klass.repr
       elsif singleton?
-        attached = __get_ivar('__attached__') || self
+        attached = get_ivar('__attached__') || self
         attached.inspect + " 'S"
       else
         @obj.inspect

@@ -87,12 +87,12 @@ module Drx
           save_graph tip
         }
 
-        @arguments_chk = TkCheckbutton.new(toplevel) {
+        @show_arguments_chk = TkCheckbutton.new(toplevel) {
           text 'Show arguments'
           variable TkVariable.new(0)
         }
-        @rubyparser_chk = TkCheckbutton.new(toplevel) {
-          text 'Use RubyParser (slow)'
+        @use_arguments_gem_chk = TkCheckbutton.new(toplevel) {
+          text "Use the 'arguments' gem (slower)"
           variable TkVariable.new(0)
         }
 
@@ -154,21 +154,21 @@ module Drx
           @graph_opts[:style] = @graph_style_menu.get
           refresh
         }
-        @arguments_chk.variable.trace('w') do |value,|
+        @show_arguments_chk.variable.trace('w') do |value,|
           if value == 1
-            @rubyparser_chk.raise
+            @use_arguments_gem_chk.raise
             @methodsbox.displaycolumns 'name arguments location'
             display_methods(current_object)
           else
-            @rubyparser_chk.lower
+            @use_arguments_gem_chk.lower
             @methodsbox.displaycolumns 'name location'
           end
         end
-        @rubyparser_chk.variable.trace('w') do |value,|
-          ObjInfo.use_rubyparser = (value == 1)
+        @use_arguments_gem_chk.variable.trace('w') do |value,|
+          ObjInfo.use_arguments_gem = (value == 1)
           display_methods(current_object)
         end
-        @arguments_chk.variable.value = @arguments_chk.variable.value # Trigger the trace handler.
+        @show_arguments_chk.variable.value = @show_arguments_chk.variable.value # Trigger the trace handler.
 
         output "Please visit the homepage, http://drx.rubyforge.org/, for usage instructions.\n", 'info'
 
@@ -233,7 +233,7 @@ module Drx
         panes.add vbox(
           TkLabel.new(toplevel, :text => 'Methods (m_tbl):', :anchor => 'w'),
           [Scrolled.new(toplevel, @methodsbox), { :expand => true, :fill => 'both' } ],
-          hbox(@arguments_chk, separator, @rubyparser_chk)
+          hbox(@show_arguments_chk, separator, @use_arguments_gem_chk)
         ), :weight => 10
 
         main_frame.add(panes)
@@ -356,6 +356,7 @@ module Drx
         end
       end
 
+      # Returns a string describing a method's arguments, for use in GUIs.
       def pretty_arguments(info, name)
         args = info.method_arguments(name)
         return args.map do |arg|
@@ -373,7 +374,7 @@ module Drx
       end
 
       def show_arguments?
-        @arguments_chk.variable == 1
+        @show_arguments_chk.variable == 1
       end
 
       # Fills the methods listbox with a list of the object's methods.

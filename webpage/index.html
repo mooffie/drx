@@ -356,7 +356,7 @@ class Drx::TkGUI::Application
     @graph_opts[:style] = 'crazy'
 
     # Turn on the "Show arguments" checkbox.
-    @arguments_chk.variable.value = 1
+    @show_arguments_chk.variable.value = 1
   end
 end
 
@@ -375,9 +375,13 @@ the methods expect. DrX uses three different strategies to detect these argument
 is installed, there's <code>Mathod#paramaters</code> to tell us about
 the arguments.</dd>
 
-<dt>RubyParser</dt>
-<dd>On Ruby 1.8 and 1.9, if the "arguments" gem is installed, DrX can use
-it to detect the arguments. In turn, that gem uses the RubyParser gem.</dd>
+<dt>The "arguments" gem</dt>
+
+<dd>(Works on both Ruby 1.8 and 1.9.) If the "arguments" gem is
+installed, DrX can use it to detect the arguments. The advantage over
+"methopara" is that you can see values of default arguments. Note that
+this gem, in turn, uses either ParseTree (for Ruby 1.8) or RubyParser
+(for Ruby 1.9), which are relatively slow.</dd>
 
 <dt>arity</dt>
 <dd>If none of the above is available, DrX uses the arity of a method to
@@ -387,8 +391,8 @@ reported. This strategy is the fallback in case any of the other ones fail.</dd>
 
 </dl>
 
-<p>The RubyParser strategy is slow, so it's only used it you explicitly
-check the "Use RubyParser" checkbox.</p>
+<p>Since the "arguments" gem is slow, it's used only if you explicitly
+check the "Use the 'arguments' gem" checkbox.</p>
 
 <h2>Reporting bugs</h2>
 

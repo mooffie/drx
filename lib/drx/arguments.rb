@@ -1,30 +1,31 @@
 # Adds method arguments detection to ObjInfo
 
-# @todo document!
-
 module Drx
 
   class ObjInfo
 
     class << self
-      attr_accessor :use_rubyparser
+      # Whether to use the 'arguments' gem, if present.
+      # This isn't on by default because it's slow.
+      attr_accessor :use_arguments_gem
     end
 
     # Returns a Ruby 1.9.2-compatible array describing the arguments a method expects.
     def method_arguments(method_name)
-      if ObjInfo.use_rubyparser
-        _method_arguments__by_rubyparser(method_name) || _method_arguments__by_arity(method_name)
+      if ObjInfo.use_arguments_gem
+        _method_arguments__by_arguments_gem(method_name) || _method_arguments__by_arity(method_name)
       else
         _method_arguments__by_methopara(method_name) || _method_arguments__by_arity(method_name)
       end
     end
 
-    # Strategy: use RubyParser, via the 'arguments' gem.
+    # Strategy: use the 'arguments' gem, which, in turn, uses either ParseTree (Ruby 1.8)
+    # or RubyParser (Ruby 1.9)
     #
     # pros: shows default values; works for 1.8 too.
     # cons: very slow.
-    def _method_arguments__by_rubyparser(method_name)
-      @@once__rubyparser ||= begin
+    def _method_arguments__by_arguments_gem(method_name)
+      @@once__arguments ||= begin
         begin
           require 'arguments'
         rescue LoadError
@@ -80,6 +81,8 @@ module Drx
     end
 
     # Strategy: simulation via Method#arity.
+    #
+    # This is used as a fallback if any of the other strategies fail.
     #
     # pros: fast; work without any gems.
     # cons: doesn't show argument names.

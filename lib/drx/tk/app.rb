@@ -432,11 +432,19 @@ module Drx
         end
       end
 
+      # Updates the window title (usually shown in the taskbar).
+      def update_title(obj)
+        toplevel.title = 'Drx: ' + begin
+          obj.is_a?(Module) ? obj.name : obj.class.name
+        end.to_s # In case of singletons, #name returns nil, so to_s enforces a string.
+      end
+
       # Makes `obj` the primary object seen (the one which is the tip of the diagram).
       def navigate_to(obj)
         @current_object = obj
         @navigation_history << obj
         display_graph(obj)
+        update_title(obj)
         # Trigger the update of the variables and methods tables by selecting this object
         # in the imagemap.
         @im.active_url = @im.urls.first

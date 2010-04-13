@@ -12,7 +12,10 @@ module Drx
     class Application
 
       def toplevel
-        @toplevel ||= TkRoot.new
+        @toplevel ||= begin
+          # We're showing ourselves inside a TkRoot, unless one already exists.
+          Application.first_window? ? TkRoot.new : TkToplevel.new
+        end
       end
 
       def initialize
@@ -451,9 +454,17 @@ module Drx
         navigate_to(current_object)
       end
 
+      class << self
+        attr_accessor :in_loop
+        def first_window?; !in_loop; end
+      end
+
       def run
-        # @todo Skip this if Tk is already running.
+        return if Application.in_loop
+        # @todo Any other way to detect that Tk's mainloop is already running?
+        Application.in_loop = true
         Tk.mainloop
+        Application.in_loop = false
         Tk.restart # So that Tk doesn't complain 'can't invoke "frame" command: application has been destroyed' next time.
       end
     end

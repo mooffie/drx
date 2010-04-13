@@ -265,11 +265,10 @@ module Drx
       def open_up_editor(filename, lineno)
         command = sprintf(ENV['DRX_EDITOR_COMMAND'] || EDITOR_COMMAND, lineno, filename)
         output "Executing: #{command}...\n", 'info'
-        if !fork
+        Thread.new do
           if !Kernel.system(command)
             output "Could not execute the command '#{command}'\n", 'error'
           end
-          exit!
         end
       end
 

@@ -11,6 +11,18 @@ module Drx
 
     class Application
 
+      # Loads ~/.drxrc.
+      #
+      # @see Application#user_customizations
+      def self.load_rc
+        @rc_loaded ||= begin
+          rc = File.join(ENV['HOME'] || Dir.pwd, '.drxrc')
+          load rc if File.exist? rc
+          1
+        end
+      end
+
+      # Returns the top-level frame in which to show ourselves.
       def toplevel
         @toplevel ||= begin
           # We're showing ourselves inside a TkRoot, unless one already exists.
@@ -175,25 +187,25 @@ module Drx
 
         output "Please visit the homepage, http://drx.rubyforge.org/, for usage instructions.\n", 'info'
 
-        one_time_initialization
+        Application.load_rc
+        system_customizations
         user_customizations
-      end
-
-      def one_time_initialization
-        @@one_time_initialization ||= begin
-          # Try to make the Unixy GUI less ugly.
-          if Tk.windowingsystem == 'x11' and Ttk.themes.include? 'clam'
-            Ttk.set_theme 'clam'
-          end
-          rc = File.join(ENV['HOME'] || Dir.pwd, '.drxrc')
-          load rc if File.exist? rc
-          1
-        end
       end
 
       # Users may redefine this method in their ~/.drxrc
       # to fine-tune the app.
       def user_customizations
+      end
+
+      # The following are default customizations. They are subjective in
+      # nature and users may knock them out in their ~/.drxrc.
+      def system_customizations
+        if Application.first_window?
+          # Try to make the Unixy GUI less ugly.
+          if Tk.windowingsystem == 'x11' and Ttk.themes.include? 'clam'
+            Ttk.set_theme 'clam'
+          end
+        end
       end
 
       def vbox(*args); VBox.new(toplevel, args); end

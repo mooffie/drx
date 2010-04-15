@@ -4,7 +4,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>DrX -- The Good Doctor</title>
-<link rel="stylesheet" href="index.css?a" type="text/css">
+<link rel="stylesheet" href="index.css?2" type="text/css">
 </head>
 
 <h1>DrX</h1>
@@ -22,13 +22,15 @@
   <a href="sequel.png"><img width="300" height="255" src="sequel_thumb.png" title="Sequel" /></a>
 </div>
 
-<p>DrX, the good doctor, is a small <em>object inspector</em> for Ruby.
+<p>DrX, the good doctor, is a small <em>object inspector</em> for Ruby.</p>
+
+<p>DrX is for newbies and gurus alike.</p>
 
 <p>Instead of focusing on the <em>contents</em> of your object, DrX
 instead focuses on its <em>object model</em>. As a result, DrX
 is most suitable for programmers wishing to understand Ruby's object
 model better. It's especially adept at showing you how a "magical"
-library works (e.g., an ORM like DataMapper or ActiveRecord).</p>
+library works (e.g., DataMapper).</p>
 
 <h2>Key features:</h2>
 
@@ -43,7 +45,7 @@ defined!</li>
 
 <h2>Installation</h2>
 
-<p>DrX is shipped as a gem. At your system prompt type:</p>
+<p>At your system prompt type:</p>
 
 <code>gem install drx</code>
 
@@ -67,7 +69,7 @@ end
 s.see
 </pre>
 
-<p>And see the <a href="#key-bindings">Key bindings</a> section.</p>
+<p>And see the <a href="#key-bindings">Key bindings</a> section for what you can do in DrX's window.</p>
 
 <h2>Requirements</h2>
 
@@ -75,7 +77,7 @@ s.see
 <li>MRI Ruby 1.8 or 1.9.</li>
 <li>Ability to compile Ruby C extensions (Because DrX has some part written in C).</li>
 <li>The Tk user interface toolkit.
-  <div class="further">
+  <div class="comment">
     <p>You can use either the "new" Tk (version 8.5), or the "old" one (version 8.4).</p>
     <p>However, if you use the "old" one, you must also have the Tile extension installed.
     For example, on Ubuntu do <code>sudo apt-get install tk-tile</code>. Alternatively, as a very last
@@ -84,7 +86,7 @@ s.see
   </div>
   </li>
 <li>The <a href="http://www.graphviz.org/">GraphViz</a> package (It's used to draw the diagrams).
-  <div class="further">
+  <div class="comment">
     <p>If the graphs DrX produces have ragged lines, it means your GraphViz doesn't have
     anti-aliasing support. A quick way to solve this on Ubuntu is by doing
     <code>sudo apt-get install graphviz-cairo</code>.</p>
@@ -270,20 +272,20 @@ the 'iv_tbl', and the 'm_tbl'.</p>
 <dt>The object graph</dt>
 <dd>
   <ul>
-  <li><span class="gist">Click</span> an object in the diagram to <span class="gist">select</span> this object. This updates the variables and methods panes to reflect this object.
+  <li><span class="gist">Click</span> an object in the graph to <span class="gist">select</span> this object. This updates the variables and methods panes to reflect this object.
       <ul><li>Alternatively, you can select objects by holding down the <span class="gist">control key while moving</span> the mouse. This is useful for quickly skimming through the objects without straining your hands.</li></ul></li>
   <li><span class="gist">Right-click</span> to move <span class="gist">back</span> in history.</li>
-  <li><span class="gist">Double-click</span> an object in the diagram to make this object the <span class="gist">tip</span> of the diagram.
+  <li><span class="gist">Double-click</span> an object in the graph to make this object the <span class="gist">tip</span> of the graph.
       Why is this useful?
       <ul>
       <li>To set the 'self' for the eval line.</li>
       <li>To see the "real" module behind an included one.</li>
       </ul>
   </li>
-  <li><span class="gist">Scrolling</span> in the diagram is done by:
+  <li><span class="gist">Scrolling</span> is done by:
       <ul>
-      <li>The mouse <span class="gist">wheel</span>. (Hold down <span class="gist">shift</span> to scroll sideways.)</li>
-      <li>Dragging with the <span class="gist">middle</span> mouse button.</li>
+      <li>The mouse <span class="gist">wheel</span>. (Hold down <span class="gist">shift</span> to scroll sideways.) <span class="comment">This doesn't work in MS-Windows.</span></li>
+      <li>Dragging with the <span class="gist">middle</span> mouse button. <em>That's the easiest and fastest way.</em></li>
       </ul>
   </li>
   </ul>
@@ -357,8 +359,8 @@ DrX lets you put your customizations in the file <code>~/.drxrc</code>. Here's a
 <pre>
 class Drx::TkGUI::Application
   def user_customizations
-    @eval_result.height = 8
-    @graph_opts[:size] = '60%'
+    @eval_result.height = 8          # Enlarge the output area.
+    @graph_opts[:size] = '60%'       # Make the graph smaller.
     @graph_opts[:style] = 'crazy'
 
     # Turn on the "Show arguments" checkbox.
@@ -366,6 +368,7 @@ class Drx::TkGUI::Application
   end
 end
 
+# Use gvim instead of gedit:
 Drx::TkGUI::EDITOR_COMMAND.replace('gvim +%d "%s"')
 </pre>
 

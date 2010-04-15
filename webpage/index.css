@@ -82,8 +82,10 @@ div.gallery h2 {
   text-align: center;
 }
 
-.further {
+.comment {
   color: #aaa;
+}
+div.comment {
   margin-left: 1em;
 }
 

@@ -4,6 +4,12 @@ FILES="314.png
       314_thumb.png
       datamapper.png
       datamapper_thumb.png
+      activerecord.png
+      activerecord_thumb.png
+      sequel.png
+      sequel_thumb.png
+      datamapper_noshadow.png
+      datamapper_noshadow_thumb.png
       editor.png
       editor_thumb.png
       file.png

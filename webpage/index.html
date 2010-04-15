@@ -363,6 +363,35 @@ end
 Drx::TkGUI::EDITOR_COMMAND.replace('gvim +%d "%s"')
 </pre>
 
+<p>As another example, here's a ~/.drxrc snippet for adding a
+drop-shadow effect to the object graph.</p>
+
+<pre>
+# The following code adds a shadow to the diagram.
+# It uses ImageMagick. Don't use this effect if you aren't
+# using a fast computer.
+
+class Drx::ObjInfo
+
+  GRAPHVIZ_COMMAND.
+    sub!(/^dot /, 'dot -Gbgcolor=transparent ').
+    sub!('-Tgif', '-Tpng') # It seems Graphviz doesn't support transparency with GIF.
+
+  alias _original__generate_diagram generate_diagram
+
+  def generate_diagram(files, *rest, &block)
+    _original__generate_diagram(files, *rest, &block)
+    system 'convert "%s" -matte \\( +clone -background black -shadow 60x4+5+4 \\) \
+            +swap -background white -mosaic "%s"' % [files['gif'], files['gif']]
+    #
+    # For explanation, see
+    # http://www.imagemagick.org/Usage/thumbnails/#shadow
+    # http://www.imagemagick.org/Usage/blur/#shadow
+  end
+
+end
+</pre>
+
 <h2 id="arguments">Method arguments</h2>
 
 <p>When you check the "Show arguments" checkbox, DrX shows the arguments

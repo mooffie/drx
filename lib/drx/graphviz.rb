@@ -8,7 +8,8 @@ module Drx
     # - Windows' CMD.EXE too supports "2>&1"
     # - We're generating GIF, not PNG, because that's a format Tk
     #   supports out of the box.
-    GRAPHVIZ_COMMAND = 'dot "%s" -Tgif -o "%s" -Tcmapx -o "%s" 2>&1'
+    # - Each {extension} token is replaced by the filepath with that extension.
+    GRAPHVIZ_COMMAND = 'dot "{dot}" -Tgif -o "{gif}" -Tcmapx -o "{map}" 2>&1'
 
     @@sizes = {
       '100%' => "
@@ -270,7 +271,7 @@ module Drx
     public
 
     # Generates a diagram of the inheritance hierarchy. It accepts a hash
-    # pointing to pathnames to write the result to. A Tempfiles hash
+    # pointing to filepaths to write the result to. A Tempfiles hash
     # can be used instead.
     #
     #   the_object = "some object"
@@ -282,7 +283,8 @@ module Drx
     def generate_diagram(files, opts = {}, &block)
       source = self.dot_source(opts, &block)
       File.open(files['dot'], 'w') { |f| f.write(source) }
-      command = GRAPHVIZ_COMMAND % [files['dot'], files['gif'], files['map']]
+      # Replace {extension} tokens with their corresponding filepaths:
+      command = GRAPHVIZ_COMMAND.gsub(/\{([a-z]+)\}/) { files[$1] }
       message = Kernel.`(command)  # `
       if $? != 0
         error = <<-EOS % [command, message]

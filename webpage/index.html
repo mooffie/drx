@@ -1,10 +1,12 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>DrX -- The Good Doctor</title>
-<link rel="stylesheet" href="index.css?2" type="text/css">
+<link rel="stylesheet" href="index.css?3" type="text/css">
 </head>
 
 <h1>DrX</h1>
@@ -20,6 +22,12 @@
   <a href="activerecord.png"><img width="300" height="255" src="activerecord_thumb.png" title="ActiveRecord" /></a>
     <br /> <br />
   <a href="sequel.png"><img width="300" height="255" src="sequel_thumb.png" title="Sequel" /></a>
+</div>
+
+<div class="menu">
+Links: <a href="http://github.com/mooffie/drx/issues">Bug tracker</a> |
+       <a href="http://github.com/mooffie/drx">GitHub page</a> |
+       <a href="http://rubygems.org/gems/drx">RubyGems page</a>
 </div>
 
 <p>DrX, the good doctor, is a small <em>object inspector</em> for Ruby.</p>
@@ -47,7 +55,7 @@ defined!</li>
 
 <p>At your system prompt type:</p>
 
-<code>gem install drx</code>
+<div><code>gem install drx</code></div>
 
 <h2>Usage</h2>
 
@@ -123,7 +131,7 @@ shown as a solid arrow, and is usually pointing down (vertical).</p>
 the object responds to"; and when you see a vertical one, think "here are
 additional methods".</p>
 
-<h3>Colors and shapes</h2>
+<h3>Colors and shapes</h3>
 
 <ul>
 <li class="color-module">Modules are shown in green</li>
@@ -150,7 +158,7 @@ this table.</p>
 
 <h2>Example 1: Seeing things</h2>
 
-For our first example, let's suppose you have the following DataMapper code...
+<p>For our first example, let's suppose you have the following DataMapper code...</p>
 
 <pre>
 require 'rubygems'
@@ -354,7 +362,7 @@ you install the DrX gem.</p>
 
 <h2>The ~/.drxrc file</h2>
 
-DrX lets you put your customizations in the file <code>~/.drxrc</code>. Here's an example:
+<p>DrX lets you put your customizations in the file <code>~/.drxrc</code>. Here's an example:</p>
 
 <pre>
 class Drx::TkGUI::Application
@@ -430,7 +438,8 @@ reported. This strategy is the fallback in case any of the other ones fail.</dd>
 <p>Since the "arguments" gem is slow, it's used only if you explicitly
 check the "Use the 'arguments' gem" checkbox.</p>
 
-<h2>Reporting bugs</h2>
+<hr />
 
-<p>Please file bug reports and support requests at the <a
-href="http://github.com/mooffie/drx/issues">issue queue</a>.</p>
+<p>
+&nbsp;
+</p>

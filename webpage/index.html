@@ -15,6 +15,8 @@
 <h2>Gallery</h2>
   <a href="314.png"><img width="300" height="255" src="314_thumb.png" title="Examining a float" /></a>
     <br /> <br />
+  <a href="datetime.png"><img width="300" height="255" src="datetime_thumb.png" title="Seeing method arguments" /></a>
+    <br /> <br />
   <a href="file.png"><img width="300" height="255" src="file_thumb.png" title="Pick the 'crazy' style for randomly mangled, though consistent, shapes." /></a>
     <br /> <br />
   <a href="datamapper.png"><img width="300" height="255" src="datamapper_thumb.png" title="DataMapper" /></a>
@@ -391,17 +393,17 @@ drop-shadow effect to the object graph.</p>
 #
 # !! Don't use this code if you aren't using a fast computer !!
 
-Drx::ObjInfo::GRAPHVIZ_COMMAND.replace('
+Drx::ObjInfo::GRAPHVIZ_COMMAND.replace '
   dot -Gbgcolor=transparent "{dot}" -Tpng -o "{gif}" -Tcmapx -o "{map}" 2>&1 && \
   convert "{gif}" -matte \\( +clone -background black -shadow 60x4+5+4 \\) \
     +swap -background white -mosaic "{gif}"
-')
+'
 
 # For further explanation, see
 # * http://www.imagemagick.org/Usage/thumbnails/#shadow
 # * http://www.imagemagick.org/Usage/blur/#shadow
 #
-# Tip: Descrees the blur (e.g., do "60x2..." instead of "60x4...") if you're
+# Tip: Decrees the blur (e.g., do "60x2..." instead of "60x4...") if you're
 # on a slow computer.
 #
 # If you're on MS-Windows, replace "&&" with ";".

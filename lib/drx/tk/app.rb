@@ -1,3 +1,10 @@
+
+# The following forces Ruby 1.9 to run Tk.mainloop in the main thread. Or
+# else DrX::TkGUI::Appliation#run won't work correctly: after calling it
+# twice, Tk.mainloop won't return, as it (apparently) won't detect the root
+# window has been destroyed.
+module TkCore; RUN_EVENTLOOP_ON_MAIN_THREAD = true; end
+
 require 'tk'
 require 'drx/tk/imagemap'
 

@@ -97,6 +97,12 @@ div.gallery h2 {
 div.comment {
   margin-left: 1em;
 }
+pre .comment {
+  color: #800;
+}
+pre .string {
+  color: #080;
+}
 
 a img {
  border: 0;

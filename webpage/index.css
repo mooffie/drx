@@ -58,15 +58,8 @@ div.menu {
   padding: 0.3em 0.5em;
 }
 
-div#toc-button {
-  background: #eeeeff;
-  border: 2px dotted #ccc;
-  padding: 0 0.3em;
-  text-align: center;
-  position: fixed;
-  left: 0;
-  top: 7em;
-  z-index: 4;
+#toc-button {
+  color: #888;
 }
 div#toc {
   display: none;
@@ -74,8 +67,8 @@ div#toc {
   border: 1px dotted black;
   padding: 1em 2em;
   position: fixed;
-  left: 0;
-  top: 2em;
+  left: 25%;
+  bottom: 2em;
 }
 div#toc-header {
   font-style: italic;

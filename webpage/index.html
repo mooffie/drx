@@ -72,6 +72,8 @@ require 'drx'
 
 Math::PI.see
 
+Enumerable.see
+
 s = "wizard of oz"
 def s.strong
   "&lt;strong&gt;" + self + "!&lt;/strong&gt;"
@@ -132,6 +134,19 @@ shown as a solid arrow, and is usually pointing down (vertical).</p>
 <p>When you see a horizontal arrow, think of it as "here are the methods
 the object responds to"; and when you see a vertical one, think "here are
 additional methods".</p>
+
+<p>Eventually you'll recognize that most graphs contain two (vertical)
+main lines of inheritance: one for "normal" classes and one for their
+corresponding "singleton" classes. This is how Ruby's object model is
+designed.</p>
+
+<p class="comment">To prevent clutter, DrX doesn't show you absolutely
+all pointers. For example, you'll notice, in the screenshots, that
+<em>Kernel</em>'s singleton doesn't point to its super, <em>Module</em>.
+It is extremely unlikely that you'll want to see the few components DrX
+decides not to show. The fully-documented methods
+<code>display_klass?</code> and <code>display_super?</code>, in
+<em>lib/drx/graphviz.rb</em>, govern what to show.</p>
 
 <h3>Colors and shapes</h3>
 
@@ -244,10 +259,11 @@ demonstrated in the screenshot). Yep, our suspicion was correct: the
 
 <p>Launch DrX's GUI (for example, by doing <code>''.see</code>). At the
 eval line type <code>require 'sinatra'</code>. Then type <code>see
-Sintra</code>. In the variables table you'll see all the sub-modules and
-classes defined under the Sinatra module. Double-click any of them to
-investigate it. When you're finished with one, right-click over the
-graph to go back.</p>
+Sintra</code>. (Alternatively, type <code>require 'sinatra'</code> at
+IRB's prompt and then <code>Sinatra.see</code>.) In the variables table
+you'll see all the sub-modules and classes defined under the Sinatra
+module. Double-click any of them to investigate it. When you're finished
+with one, right-click over the graph to go back.</p>
 
 <h2>Understanding DrX</h2>
 
@@ -356,9 +372,13 @@ correct line, but sometimes it doesn't update the display and still shows the
 first page of the file. If this happens, click arrow-up, then
 arrow-down, to update the display. Or use some other editor.</p>
 
-<p>DrX figures out a method's location by inspecting Ruby's internal
-nodes. This functionality is contained in a small C extension built when
-you install the DrX gem.</p>
+<p>For Ruby 1.8, DrX figures out a method's location by inspecting
+Ruby's internal nodes. This functionality is contained in a small C
+extension built when you install the DrX gem. For Ruby 1.9,
+<em>Method#source_location</em> is used instead, but, unfortunately, for
+Ruby 1.9 attribute readers/setters are reported as <em>&lt;c&gt;</em> and
+not as <em>&lt;attr reader&gt;</em> and <em>&lt;attr
+setter&gt;</em>.</p>
 
 <p>Of course, DrX can't figure out the location of a method written in C.</p>
 

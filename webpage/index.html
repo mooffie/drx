@@ -11,10 +11,10 @@
 <link rel="stylesheet" href="index.css?3" type="text/css">
 </head>
 
-<h1>DrX</h1>
+<h1 id="drx">DrX</h1>
 
 <div class="gallery">
-<h2>Gallery</h2>
+<h2 id="gallery">Gallery</h2>
   <a href="314.png"><img width="300" height="255" src="314_thumb.png" title="Examining a float" /></a>
     <br /> <br />
   <a href="datetime.png"><img width="300" height="255" src="datetime_thumb.png" title="Seeing method arguments" /></a>
@@ -44,7 +44,7 @@ is most suitable for programmers wishing to understand Ruby's object
 model better. It's especially adept at showing you how a "magical"
 library works (e.g., DataMapper).</p>
 
-<h2>Key features:</h2>
+<h2 id="features">Key features:</h2>
 
 <ul>
 <li>See everything about a Ruby object: its 'klass', 'super',
@@ -55,13 +55,13 @@ and position the cursor on the exact line where the method is
 defined!</li>
 </ul>
 
-<h2>Installation</h2>
+<h2 id="installation">Installation</h2>
 
 <p>At your system prompt type:</p>
 
 <div><code>gem install drx</code></div>
 
-<h2>Usage</h2>
+<h2 id="usage">Usage</h2>
 
 <p>Just <code>require 'drx'</code> in your program and do
 <code>some_object.see</code> to investigate that object:</p>
@@ -85,7 +85,7 @@ s.see
 
 <p>And see the <a href="#key-bindings">Key bindings</a> section for what you can do in DrX's window.</p>
 
-<h2>Requirements</h2>
+<h2 id="requirements">Requirements</h2>
 
 <ol>
 <li>MRI Ruby 1.8 or 1.9.</li>
@@ -112,14 +112,14 @@ s.see
 <p>(A note to MS-Windows users: DrX was installed sucessfully under: RubyInstaller + DevKit; Tk
 from ActiveState and bindings via <a href="http://github.com/rdp/tk_as_gem">tk_as_gem</a>.)</p>
 
-<h2>Recommendations</h2>
+<h2 id="recommendations">Recommendations</h2>
 
 <p>DrX <a href="#arguments">can show you the arguments</a> methods expect. While this is not
 needed, DrX can work more effectively if you install the "arguments"
 and/or the "methodpara" gems. In short, do <code>gem install
 rdp-arguments</code> and <code>gem install methopara</code>.</p>
 
-<h2>The object graph</h2>
+<h2 id="objgraph">The object graph</h2>
 
 <p>The object graph shows the object model. Ruby objects have two "pointers":</p>
 
@@ -150,7 +150,7 @@ decides not to show. The fully-documented methods
 <code>display_klass?</code> and <code>display_super?</code>, in
 <em>lib/drx/graphviz.rb</em>, govern what to show.</p>
 
-<h3>Colors and shapes</h3>
+<h3 id="colors">Colors and shapes</h3>
 
 <ul>
 <li class="color-module">Modules are shown in green</li>
@@ -160,7 +160,7 @@ decides not to show. The fully-documented methods
 
 <p>(This is true for the default style only.)</p>
 
-<h2>The variables table</h2>
+<h2 id="variables">The variables table</h2>
 
 <p>A Ruby object has a <em>variables table</em> associated with it. The
 variables pane lists the content of this table. It is customary to think
@@ -169,13 +169,13 @@ of this table as holding instance <code>@variables</code> <code>@like</code>
 ("namespaces") and <code>@@class_variables</code>. The pane shows the raw
 contents of this table.</p>
 
-<h2>The methods table</h2>
+<h2 id="methods">The methods table</h2>
 
 <p>A Ruby object, if it's a class or a module, also holds methods. These
 are stored in a <em>methods table</em>. The methods pane shows the contents of
 this table.</p>
 
-<h2>Example 1: Seeing things</h2>
+<h2 id="ex1">Example 1: Seeing things</h2>
 
 <p>For our first example, let's suppose you have the following DataMapper code...</p>
 
@@ -233,7 +233,7 @@ class' singleton: most importantly it contains the
 <em>DataMapper::Model</em> module. Take a moment to click these two
 modules and examine the methods they contain.</p>
 
-<h2>Example 2: Investigating things</h2>
+<h2 id="ex2">Example 2: Investigating things</h2>
 
 <p>Let's talk more about our Post class. We merely did <code>include
 DataMapper::Resource</code> in its body and we see that it's acquired
@@ -257,7 +257,7 @@ demonstrated in the screenshot). Yep, our suspicion was correct: the
 <em>Model</em> module is added to our Post class by
 <code>Resource.included</code>. The mystery is solved!</p>
 
-<h2>Example 3: Sinatra</h2>
+<h2 id="ex3">Example 3: Sinatra</h2>
 
 <p>Launch DrX's GUI (for example, by doing <code>''.see</code>). At the
 eval line type <code>require 'sinatra'</code>. Then type <code>see
@@ -267,7 +267,7 @@ you'll see all the sub-modules and classes defined under the Sinatra
 module. Double-click any of them to investigate it. When you're finished
 with one, right-click over the graph to go back.</p>
 
-<h2>Understanding DrX</h2>
+<h2 id="understanding">Understanding DrX</h2>
 
 <p>Here is how objects are defined internally in MRI ruby (from ruby.h):</p>
 
@@ -362,7 +362,7 @@ the 'iv_tbl', and the 'm_tbl'.</p>
 
 </dl>
 
-<h2>Launching an editor</h2>
+<h2 id="editor">Launching an editor</h2>
 
 <p>When you double-click a method, DrX launches the command <code>gedit +%d "%s"</code>
 by default (%d and %s are substituted by the line-number
@@ -384,7 +384,7 @@ setter&gt;</em>.</p>
 
 <p>Of course, DrX can't figure out the location of a method written in C.</p>
 
-<h2>The ~/.drxrc file</h2>
+<h2 id="drxrc">The ~/.drxrc file</h2>
 
 <p>DrX lets you put your customizations in the file <code>~/.drxrc</code>. Here's an example:</p>
 
@@ -463,6 +463,12 @@ reported. This strategy is the fallback in case any of the other ones fail.</dd>
 check the "Use the 'arguments' gem" checkbox.</p>
 
 <hr />
+
+<div id="toc-button">T<br />O<br />C</div>
+<div id="toc">
+  <div id="toc-header">Table&nbsp;of&nbsp;Contents</div>
+  <div id="toc-links"></div>
+</div>
 
 <p>
 &nbsp;

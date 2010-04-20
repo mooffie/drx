@@ -5,10 +5,10 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script type="text/javascript" src="jquery.js?3"></script>
-<script type="text/javascript" src="index.js?3"></script>
+<script type="text/javascript" src="jquery.js?4"></script>
+<script type="text/javascript" src="index.js?4"></script>
 <title>DrX -- The Good Doctor</title>
-<link rel="stylesheet" href="index.css?3" type="text/css">
+<link rel="stylesheet" href="index.css?4" type="text/css">
 </head>
 
 <h1 id="drx">DrX</h1>
@@ -293,6 +293,13 @@ struct RClass {
 
 <p>What DrX does is show you these four slots: the 'klass', the 'super',
 the 'iv_tbl', and the 'm_tbl'.</p>
+
+<p class="comment">Additionally, if <code>RBasic::flags</code> has the
+<code>FL_SINGLETON</code> bit turned on, DrX will report the class as a
+singleton. Note, however, that singletons are just like ordinary
+classes, and I'm aware of the fact that painting them differently (in
+the object graph) might give a false impression that they are somehow
+special.</p>
 
 <h2 id="key-bindings">Key bindings</h2>
 

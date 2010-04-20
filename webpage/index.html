@@ -32,7 +32,7 @@
 Links: <a href="http://github.com/mooffie/drx/issues">Bug tracker</a> |
        <a href="http://github.com/mooffie/drx">GitHub page</a> |
        <a href="http://rubygems.org/gems/drx">RubyGems page</a> |
-       <span id="toc-button">TOC</span>
+       <span id="toc-button">TOC ⇨</span>
 </div>
 
 <p>DrX, the good doctor, is a small <em>object inspector</em> for Ruby.</p>
@@ -469,6 +469,12 @@ reported. This strategy is the fallback in case any of the other ones fail.</dd>
 
 <p>Since the "arguments" gem is slow, it's used only if you explicitly
 check the "Use the 'arguments' gem" checkbox.</p>
+
+<h2 id="future">Future</h2>
+
+<p>Since I'm interested in the (MRI) implementation of methods written
+in C, I'm planning to make DrX able to locate C methods in MRI's source
+code. I'll probably use a primitive ad-hoc parser for this.</p>
 
 <hr />
 

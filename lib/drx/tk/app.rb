@@ -58,7 +58,7 @@ module Drx
       def initialize
         @navigation_history = []
         @eval_history = LineHistory.new
-        @graph_opts = { :size => '100%', :style => 'default' }
+        @graph_opts = { :size => '90%', :style => 'default' }
 
         @eval_entry = TkEntry.new(toplevel) {
           font 'Courier'
@@ -109,7 +109,7 @@ module Drx
         }
 
         @graph_size_menu = Tk::Tile::Combobox.new(toplevel) {
-          set '100%'
+          set '90%'
           values ['100%', '90%', '80%', '60%']
           state :readonly
           width 6

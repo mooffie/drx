@@ -272,6 +272,13 @@ you'll see all the sub-modules and classes defined under the Sinatra
 module. Double-click any of them to investigate it. When you're finished
 with one, right-click over the graph to go back.</p>
 
+<p>You can open multiple DrX windows by doing
+<code>some_object.see</code> at the eval line. For example, you may do
+<code>self.see</code> to duplicate the window. Note, however, that Ruby
+seems to have a glitch: doing <code>#instance_eval</code> on an object,
+which is what DrX does when you eval something, forces a singleton for
+it. You'll see this artefact in the diagram.</p>
+
 <h2 id="understanding">Understanding DrX</h2>
 
 <p>Here is how objects are defined internally in MRI ruby (from ruby.h):</p>

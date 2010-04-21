@@ -89,12 +89,16 @@ s.see
 <h2 id="requirements">Requirements</h2>
 
 <ol>
-<li>MRI Ruby 1.8 or 1.9.</li>
+<li>MRI Ruby 1.8 or 1.9.
+  <div class="comment">
+    <p>DrX was tested on Ruby 1.8.6 and up. I don't know about earlier versions.</p>
+  </div>
+  </li>
 <li>Ability to compile Ruby C extensions (Because DrX has some part written in C).</li>
 <li>The Tk user interface toolkit.
   <div class="comment">
     <p>You can use either the "new" Tk (version 8.5), or the "old" one (version 8.4).</p>
-    <p>However, if you use the "old" one, you must also have the Tile extension installed.
+    <p>However, if you use the "old" one, <em>you must also have the Tile extension installed.</em>
     For example, on Ubuntu do <code>sudo apt-get install tk-tile</code>. Alternatively, as a very last
     resort, use an old version of DrX which doesn't necessitates Tile
     (that's any version earlier than 0.4).</p>

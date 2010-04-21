@@ -236,7 +236,7 @@ module Drx
         # of included modules, or modules included in them). To prevent
         # clutter we print the arrow to Module only if it comes from
         # Class (or a module included in it).
-        return (my_ancestors + [self]).include? _Class
+        return (my_ancestors + [self]).include?(_Class)
         #
         # A somewhat irrelevant note (I don't have a better place to put it):
         #

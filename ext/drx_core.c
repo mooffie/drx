@@ -72,7 +72,12 @@ static VALUE t_get_super(VALUE self, VALUE obj)
   if (TYPE(obj) != T_CLASS && TYPE(obj) != T_ICLASS && TYPE(obj) != T_MODULE) {
     rb_raise(rb_eTypeError, "Only T_CLASS/T_MODULE is expected as the argument (got %d)", TYPE(obj));
   }
+#ifdef RCLASS_SUPER
+  // Ruby 1.8.7 and above have this macro.
   return RCLASS_SUPER(obj) ? RCLASS_SUPER(obj) : Qnil;
+#else
+  return RCLASS(obj)->super ? RCLASS(obj)->super : Qnil;
+#endif
 }
 
 /**

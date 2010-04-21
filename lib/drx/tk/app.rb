@@ -8,7 +8,25 @@ module TkCore; RUN_EVENTLOOP_ON_MAIN_THREAD = true; end
 require 'tk'
 require 'drx/tk/imagemap'
 
-Tk.default_widget_set = :Ttk
+# -------- Start of legacy Tk handling ------------
+#
+# Tweaks for old Ruby/Tk should go here.
+#
+require 'tkextlib/tile' if !defined? Tk::Tile
+if Tk.respond_to? :default_widget_set
+  # Replace all legacy widgets by their nifty Tile versions.
+  Tk.default_widget_set = :Ttk
+else
+  # The non-Tile Panedwindow doesn't support :weight
+  class TkPanedwindow
+    alias original_add add
+    def add(what, opts = {})
+      opts.delete :weight
+      original_add(what, opts)
+    end
+  end
+end
+# -------- End of legacy Tk handling ------------
 
 module Drx
   module TkGUI
@@ -209,8 +227,8 @@ module Drx
       def system_customizations
         if Application.first_window?
           # Try to make the Unixy GUI less ugly.
-          if Tk.windowingsystem == 'x11' and Ttk.themes.include? 'clam'
-            Ttk.set_theme 'clam'
+          if Tk::Tile.respond_to? :themes and Tk.windowingsystem == 'x11' and Tk::Tile.themes.include? 'clam'
+            Tk::Tile.set_theme 'clam'
           end
         end
       end
@@ -387,7 +405,7 @@ module Drx
           when :rest;  '*' + (arg[1] || 'args').to_s
           when :block; '&' + (arg[1] || 'arg').to_s
           end
-        end.join ', '
+        end.join(', ')
       rescue NameError
         return '---'
       rescue SyntaxError => e
@@ -433,6 +451,7 @@ module Drx
         Tempfiles.new do |files|
           ObjInfo.new(obj).generate_diagram(files, @graph_opts)
           if (output = Tk.getSaveFile(:parent => toplevel, :defaultextension => '.gif')) != ''
+            require 'fileutils'
             FileUtils.cp(files['gif'], output)
           end
         end

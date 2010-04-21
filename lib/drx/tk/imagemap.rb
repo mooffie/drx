@@ -198,8 +198,11 @@ module TkImageMap
         # If there are few sides, we assume it's a real polygon.
         return nil
       end
-      x_min, x_max = points.map {|p| p[0]}.minmax
-      y_min, y_max = points.map {|p| p[1]}.minmax
+      # Alas, Ruby 1.8.6 doesn't have #minmax
+      xs = points.map {|p| p[0]}
+      ys = points.map {|p| p[1]}
+      x_min, x_max = xs.min, xs.max
+      y_min, y_max = ys.min, ys.max
       # @todo: try to figure out if the points trace a circle?
       #center_x = x_min + (x_max - x_min) / 2.0
       #center_y = y_min + (y_max - y_min) / 2.0

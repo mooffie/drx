@@ -440,6 +440,14 @@ Drx::ObjInfo::GRAPHVIZ_COMMAND.replace '
     +swap -background white -mosaic "{gif}"
 '
 
+# If you're on MS-Windows, replace "&&" with ";".
+
+# 2010-Apr-21:
+#   The above command will fail for Ruby 1.8.6. That's because Ruby
+#   will generate a filename whose extension isn't exactly ".gif",
+#   resulting in ImageMagick generating a PNG file, which Tk can't read.
+#   I'll try to figure out a solution later. (Ruby 1.8.7 and up are fine.)
+
 # For further explanation, see
 # * http://www.imagemagick.org/Usage/thumbnails/#shadow
 # * http://www.imagemagick.org/Usage/blur/#shadow
@@ -447,7 +455,6 @@ Drx::ObjInfo::GRAPHVIZ_COMMAND.replace '
 # Tip: Decrees the blur (e.g., do "60x2..." instead of "60x4...") if you're
 # on a slow computer.
 #
-# If you're on MS-Windows, replace "&&" with ";".
 </pre>
 
 <h2 id="arguments">Method arguments</h2>

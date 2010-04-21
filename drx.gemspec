@@ -2,7 +2,7 @@ require 'rubygems'
 
 spec = Gem::Specification.new do |s|
   s.name          = 'drx'
-  s.version       = '0.4.4'
+  s.version       = '0.4.5'
   s.author        = 'Mooffie'
   s.email         = 'mooffie@gmail.com'
   s.platform      = Gem::Platform::RUBY

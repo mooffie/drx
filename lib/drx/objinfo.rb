@@ -38,7 +38,7 @@ module Drx
       Core::get_m_tbl(@obj)
     end
 
-    # Returns the source-code position where a method is defined.
+    # Returns the source-code location where a pure ruby method is defined.
     #
     # Returns one of:
     #  - [ 'file.rb', 12 ]
@@ -46,22 +46,41 @@ module Drx
     #    returns only "<c>").
     #  - nil, if functionality not implemented.
     #  - raises NameError if method not found.
-    def locate_method(method_name)
+    def locate_pure_ruby_method(method_name)
       if Core.respond_to? :locate_method
         # Ruby 1.8
         Core::locate_method(@obj, method_name)
       elsif Method.method_defined? :source_location
         # Ruby 1.9
-        location = @obj.instance_method(method_name).source_location
-        if location
-          location
-        else
-          '<c>'
-        end
+        @obj.instance_method(method_name).source_location || '<c>'
       else
         # Some version of ruby that doesn't have Method#source_loction
         nil
       end
+    end
+
+    # Similar to locate_pure_ruby_method() but also returns source-code
+    # location for methods written in C. It's only effective if the
+    # 'cloc' gem is installed.
+    def locate_method(method_name)
+      location = locate_pure_ruby_method(method_name)
+      if location == '<c>' and Drx::Cloc.available?
+        Drx::Cloc.lookup(cloc_name, method_name) || location
+      else
+        location
+      end
+    end
+
+    # Returns the name this object (class or module) appears in the cloc
+    # database. It's the fully qualified stringy name + optional
+    # "--singleton"
+    def cloc_name
+      @cloc_name ||=
+        if singleton?
+          ObjInfo.new(get_ivar('__attached__')).get_ivar('__classpath__') + '--singleton'
+        else
+          get_ivar('__classpath__') || ''
+        end
     end
 
     def has_iv_tbl?

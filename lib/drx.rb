@@ -4,6 +4,7 @@ require 'drx_core' # The C extension.
 require 'drx/objinfo'
 require 'drx/arguments'
 require 'drx/graphviz'
+require 'drx/cloc'
 
 module Drx
 

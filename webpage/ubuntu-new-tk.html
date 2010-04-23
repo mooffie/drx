@@ -1,0 +1,48 @@
+<head>
+<style type="text/css">
+.ver {
+  color: red;
+}
+pre {
+  background: #ddd;
+  padding: 0.5em;
+}
+</style>
+</head>
+
+<h1>Ubuntu and Ruyb/Tk</h1>
+
+<p>In Ubuntu, the old Tk 8.4 is still considered the default Tk. So
+Ruby/Tk is compiled against it. And so we have ugly fonts. For those
+preferring to stick with the official packages, here's how to compile Ruby/Tk
+against the newer Tk 8.5.</p>
+
+<p>(The instructions assume you're using Ruby 1.8. If you're using Ruby
+1.9.1, replace all red occurrences of "1.8" with "1.9.1".)</p>
+
+<pre>
+sudo apt-get install tcl8.5-dev tk8.5-dev
+
+mkdir tmp
+
+cd tmp
+
+apt-get source libruby<span class="ver">1.8</span>
+
+cd ruby<span class="ver">1.8</span>-<span class="ver">1.8</span>*/ext/tk
+
+CONFIGURE_ARGS='--with-tcl-include=/usr/include/tcl8.5/ --with-tcllib=tcl8.5 --with-tklib=tk8.5' ruby<span class="ver">1.8</span> extconf.rb
+
+make
+
+sudo mv /usr/lib/ruby/<span class="ver">1.8</span>/i486-linux/tcltklib.so /usr/lib/ruby/<span class="ver">1.8</span>/i486-linux/tcltklib.so.orig
+
+sudo cp tcltklib.so /usr/lib/ruby/<span class="ver">1.8</span>/i486-linux/
+
+cd ..
+
+rm -rf tmp
+</pre>
+
+<p>Please let me know of any problems with the instructions.</p>
+

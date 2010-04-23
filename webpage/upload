@@ -16,6 +16,7 @@ FILES="314.png
       file_thumb.png
       index.css
       index.html
+      ubuntu-new-tk.html
       "
 
 scp $FILES mooffie@rubyforge.org:/var/www/gforge-projects/drx/

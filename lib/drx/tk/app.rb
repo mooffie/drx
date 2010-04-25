@@ -136,6 +136,17 @@ module Drx
           variable TkVariable.new(0)
         }
 
+        @use_cloc_chk = TkCheckbutton.new(toplevel) {
+          text 'Locate methods in C code'
+          variable TkVariable.new(0)
+        }
+        @cloc_versions_menu = Tk::Tile::Combobox.new(toplevel) {
+          set Drx::Cloc.version
+          values Drx::Cloc.versions
+          state :readonly
+          width 6
+        }
+
         layout
 
         @varsbox.bind('<TreeviewSelect>') {
@@ -198,7 +209,7 @@ module Drx
           if value == 1
             @use_arguments_gem_chk.raise
             @methodsbox.displaycolumns 'name arguments location'
-            display_methods(current_object)
+            refresh :methods
           else
             @use_arguments_gem_chk.lower
             @methodsbox.displaycolumns 'name location'
@@ -206,9 +217,35 @@ module Drx
         end
         @use_arguments_gem_chk.variable.trace('w') do |value,|
           ObjInfo.use_arguments_gem = (value == 1)
-          display_methods(current_object)
+          refresh :methods
         end
         @show_arguments_chk.variable.value = @show_arguments_chk.variable.value # Trigger the trace handler.
+
+        @use_cloc_chk.variable.trace('w') do |variable,|
+          if variable == 1
+            if Drx::Cloc.available?
+              Drx::Cloc.use = true
+              @cloc_versions_menu.raise
+              refresh :methods
+            else
+              variable.value = 0
+              if Drx::Cloc.library_available?
+                output "You must first run the 'cloc' executable to generate a locations database.\n", 'error'
+              else
+                output "You must install the 'cloc' gem to enable this functionality.\n", 'error'
+              end
+            end
+          else
+            Drx::Cloc.use = false
+            @cloc_versions_menu.lower
+            refresh :methods
+          end
+        end
+        @cloc_versions_menu.bind('<ComboboxSelected>') {
+          Drx::Cloc.version = @cloc_versions_menu.get
+          refresh :methods
+        }
+        @use_cloc_chk.variable.value = Drx::Cloc.available? ? 1 : 0
 
         output "Please visit the homepage, http://drx.rubyforge.org/, for usage instructions.\n", 'info'
 
@@ -273,7 +310,8 @@ module Drx
         panes.add vbox(
           TkLabel.new(toplevel, :text => 'Methods (m_tbl):', :anchor => 'w'),
           [Scrolled.new(toplevel, @methodsbox), { :expand => true, :fill => 'both' } ],
-          hbox(@show_arguments_chk, separator, @use_arguments_gem_chk)
+          hbox(@show_arguments_chk, separator, @use_arguments_gem_chk),
+          hbox(@use_cloc_chk, separator, @cloc_versions_menu)
         ), :weight => 10
 
         main_frame.add(panes)
@@ -482,15 +520,21 @@ module Drx
       end
 
       # Refreshes the display.
-      def refresh
-        navigate_to tip
+      def refresh(what = [:graph, :variables, :methods])
+        what = Array(what)
+        if what.include? :graph
+          # Refreshes everything
+          navigate_to tip
+        else
+          display_methods(current_object) if what.include? :methods
+          display_variables(current_object) if what.include? :variables
+        end
       end
 
       # Make `obj` the selected object. That is, the one the variable and method boxes reflect.
       def select_object(obj)
          @current_object = obj
-         display_variables(current_object)
-         display_methods(current_object)
+         refresh [:variables, :methods]
       end
 
       # Navigate_to the selected object.

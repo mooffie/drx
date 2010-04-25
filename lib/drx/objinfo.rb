@@ -64,7 +64,7 @@ module Drx
     # 'cloc' gem is installed.
     def locate_method(method_name)
       location = locate_pure_ruby_method(method_name)
-      if location == '<c>' and Drx::Cloc.available?
+      if location == '<c>' and Drx::Cloc.use?
         Drx::Cloc.lookup(cloc_name, method_name) || location
       else
         location

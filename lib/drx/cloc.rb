@@ -1,14 +1,23 @@
 
 module Drx
 
+  # A wrapper around the 'cloc' library, which enables us to locate methods
+  # in C source files.
+  #
+  # ObjInfo#locate_method() uses this module.
   module Cloc
 
+    # Tells us whether the cloc library is installed and functioning.
     def self.available?
-      @available ||= begin
+      @available ||= library_available? && !::Cloc::Database.versions.empty?
+    end
+
+    def self.library_available?
+      @library_evailable ||= begin
         begin
           require 'cloc'
         rescue LoadError
-          # The gem isn't installed.
+          # The library is not installed.
           false
         else
           true
@@ -16,14 +25,20 @@ module Drx
       end
     end
 
+    # Whether to actually use the cloc library.
+    def self.use=(bool)
+      @use = bool
+    end
+
+    def self.use?
+      @use && available?
+    end
+
     def self.db
-      @db ||= begin
+      @db ||=
         if available?
           ::Cloc::Database.new(version).data
-        else
-          nil
         end
-      end
     end
 
     def self.lookup(object_name, method_name)
@@ -32,21 +47,25 @@ module Drx
       end
     end
 
+    # Select the cloc database to use.
     def self.version=(version)
       @version = version
       @db = nil # so db() will load a new one.
     end
 
     def self.version
-      @version ||= begin
+      @version ||=
         if available?
           ::Cloc::Database.default_version
         end
-      end
     end
 
     def self.versions
-      ::Cloc::Database.versions
+      if available?
+        ::Cloc::Database.versions
+      else
+        []
+      end
     end
 
   end

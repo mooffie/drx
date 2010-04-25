@@ -37,14 +37,12 @@ module Drx
     def self.db
       @db ||=
         if available?
-          ::Cloc::Database.new(version).data
+          ::Cloc::Database.new(version)
         end
     end
 
     def self.lookup(object_name, method_name)
-      if db[object_name] and db[object_name][method_name]
-        return db[object_name][method_name]
-      end
+      db.lookup(object_name, method_name)
     end
 
     # Select the cloc database to use.

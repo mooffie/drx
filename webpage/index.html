@@ -281,6 +281,45 @@ seems to have a glitch: doing <code>#instance_eval</code> on an object,
 which is what DrX does when you eval something, forces a singleton for
 it. You'll see this artefact in the diagram.</p>
 
+<h2 id="ex-c">Example 4: Seeing methods written in C</h2>
+
+<p>If you install the <em>cloc</em> gem, DrX can locate methods
+written in C in the same ease it locates pure-Ruby methods. You'll be able to
+launch your editor to see the C implementation.</p>
+
+<p>The following example shows the dialog you may carry out with your
+shell to setup your system:</p>
+
+<pre>
+# Install the cloc gem
+$ gem install cloc
+
+# We need to download Ruby's source-code so cloc can index it.
+# Let's download it from github.com:
+$ git clone http://github.com/rubyspec/matzruby.git
+
+$ cd matzruby
+
+# Let's checkuot the 1.8.7 branch, because this happens to be the
+# Ruby we're interested in.
+$ git checkout origin/ruby_1_8_7
+
+# Ask cloc to index it:
+$ cloc .
+
+# Let's also index the C code in our gems:
+$ cd ~/.gem/ruby/1.8
+$ cloc .
+</pre>
+
+<p>That's all! The next time you launch DrX you'll be able to lanuch your editor and see how
+various methods are implemented in C. Here's a screenshot:</p>
+
+<div align="center">
+  <a href="cloc.png"><img width="500" height="375"
+    src="cloc_thumb.jpg" title="Screenshot showing DrX in action" /></a>
+</div>
+
 <h2 id="understanding">Understanding DrX</h2>
 
 <p>Here is how objects are defined internally in MRI ruby (from ruby.h):</p>
@@ -399,11 +438,10 @@ arrow-down, to update the display. Or use some other editor.</p>
 Ruby's internal nodes. This functionality is contained in a small C
 extension built when you install the DrX gem. For Ruby 1.9,
 <em>Method#source_location</em> is used instead, but, unfortunately, for
-Ruby 1.9 attribute readers/setters are reported as <em>&lt;c&gt;</em> and
-not as <em>&lt;attr reader&gt;</em> and <em>&lt;attr
-setter&gt;</em>.</p>
-
-<p>Of course, DrX can't figure out the location of a method written in C.</p>
+Ruby 1.9 attribute readers/setters are reported as <em>&lt;c&gt;</em>
+and not as <em>&lt;attr reader&gt;</em> and <em>&lt;attr
+setter&gt;</em>. As for methods written in C: locating them is done
+by the <em>cloc</em> gem.</p>
 
 <h2 id="drxrc">The ~/.drxrc file</h2>
 
@@ -489,12 +527,6 @@ reported. This strategy is the fallback in case any of the other ones fail.</dd>
 
 <p>Since the "arguments" gem is slow, it's used only if you explicitly
 check the "Use the 'arguments' gem" checkbox.</p>
-
-<h2 id="future">Future</h2>
-
-<p>Since I'm interested in the (MRI) implementation of methods written
-in C, I'm planning to make DrX able to locate C methods in MRI's source
-code. I'll probably use a primitive ad-hoc parser for this.</p>
 
 <hr />
 
